@@ -5,13 +5,11 @@ import Navbar from "./Navbar";
 import JourneyProgress from "./JourneyProgress";
 import "../../styles/experience.css";
 
-/**
- * Visual shell only. Existing routes, journey, and feature state remain untouched.
- */
+/** The real app is unchanged; /dashboard is its home after / becomes the prologue. */
 export default function AppLayout() {
   const { pathname } = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const isDashboard = pathname === "/";
+  const isDashboard = pathname === "/dashboard";
 
   return (
     <div className="kinship-shell min-h-screen lg:flex">

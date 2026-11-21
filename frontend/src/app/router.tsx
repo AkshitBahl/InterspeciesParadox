@@ -1,56 +1,35 @@
+import { lazy, Suspense } from "react";
+import { createBrowserRouter } from "react-router-dom";
 import AssessmentPage from "../features/assessment/AssessmentPage";
 import ReportConflictPage from "../features/conflict/ReportConflictPage";
 import ProfilePage from "../features/profile/ProfilePage";
-import { createBrowserRouter } from "react-router-dom";
 import MediationPage from "../features/mediation/MediationPage";
 import AgreementPage from "../features/agreement/AgreementPage";
-
 import AppLayout from "../components/layout/AppLayout";
 import DashboardPage from "../features/dashboard/DashboardPage";
 
-// function ComingSoon({ title }: { title: string }) {
-//   return (
-//     <div className="rounded-3xl border border-forest/10 bg-white p-10">
-//       <p className="mb-3 text-sm text-leaf">Coming next</p>
-
-//       <h1 className="text-3xl font-bold text-forest">{title}</h1>
-
-//       <p className="mt-3 text-ink/60">
-//         We'll build this screen in the next steps.
-//       </p>
-//     </div>
-//   );
-// }
+// Only the prologue is new. Everything below retains its existing route and logic.
+// Lazy loading keeps the scene and its illustration out of the normal app bundle.
+const IntroPage = lazy(() => import("../features/intro/IntroPage"));
 
 export const router = createBrowserRouter([
   {
     path: "/",
+    element: (
+      <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-forest text-cream">Growing your neighborhood…</div>}>
+        <IntroPage />
+      </Suspense>
+    ),
+  },
+  {
     element: <AppLayout />,
     children: [
-      {
-        index: true,
-        element: <DashboardPage />,
-      },
-      {
-        path: "profile",
-        element: <ProfilePage />,
-      },
-      {
-        path: "conflict/new",
-        element: <ReportConflictPage />,
-      },
-      {
-        path: "conflict/:id/assessment",
-        element: <AssessmentPage />,
-      },
-      {
-        path: "conflict/:id/mediation",
-        element: <MediationPage />,
-      },
-      {
-        path: "conflict/:id/agreement",
-        element: <AgreementPage />,
-      },
+      { path: "dashboard", element: <DashboardPage /> },
+      { path: "profile", element: <ProfilePage /> },
+      { path: "conflict/new", element: <ReportConflictPage /> },
+      { path: "conflict/:id/assessment", element: <AssessmentPage /> },
+      { path: "conflict/:id/mediation", element: <MediationPage /> },
+      { path: "conflict/:id/agreement", element: <AgreementPage /> },
     ],
   },
 ]);

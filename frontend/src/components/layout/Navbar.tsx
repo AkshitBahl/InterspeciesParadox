@@ -6,7 +6,7 @@ interface NavbarProps {
 }
 
 const pageNames: Record<string, string> = {
-  "/": "The living city",
+  "/dashboard": "The living city",
   "/profile": "Human representative",
   "/conflict/new": "New coexistence case",
 };
