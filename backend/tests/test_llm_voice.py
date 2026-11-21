@@ -75,10 +75,18 @@ def test_llm_rewords_but_keeps_the_grounding(client, ollama):
     assert {g["source"] for g in intro["grounding"]} >= {"species.preferred_buffer_m", "species.min_buffer_m"}
     # The prompt carries the persona and the rules.
     system, user = (m["content"] for m in ollama.calls[0]["messages"])
-    assert "Vix Rousseau" in system and "Do not add any number" in user
+    assert "Vix Rousseau" in system and "Never add a number" in user
     # Same question again: answered from the cache, no second call.
     client.get(f"{API}/species/red-fox/representative")
     assert len(ollama.calls) == 1
+
+
+def test_cache_expires_so_replies_can_vary(client, ollama, monkeypatch):
+    monkeypatch.setattr(settings, "llm_cache_seconds", 0)
+    client.get(f"{API}/species/red-fox/representative")
+    client.get(f"{API}/species/red-fox/representative")
+    assert len(ollama.calls) == 2
+    assert ollama.calls[0]["temperature"] == settings.llm_temperature
 
 
 def test_invented_numbers_fall_back_to_the_template(client, ollama):

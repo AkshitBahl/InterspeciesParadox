@@ -27,7 +27,7 @@ DEFAULT_PHRASEBOOK: dict[str, list[str]] = {
         "I need about {buffer_m} m of calm around my {site} during {months}. Below {min_buffer_m} m it stops working for us.",
     ],
     "need.time": [
-        "{months} is our sensitive season. Big, noisy works then are a no-go for us.",
+        "Our sensitive months: {months}. Big, noisy works then are a no-go for us.",
     ],
     "need.access": [
         "Please keep the way in and out of my {site} clear. A blocked door is no door at all.",
@@ -59,7 +59,7 @@ DEFAULT_PHRASEBOOK: dict[str, list[str]] = {
     "refuse_sign": ["I won't sign a plan that leaves us at {score} out of 100."],
     "comment": ["Noted! {catchphrase}"],
     # Route negotiation (someone wants to walk, ride or drive past the home).
-    "route.objection": ["Hold on! Your route runs {inside_m} m through the quiet zone around my {site}, and in {months} we need calm."],
+    "route.objection": ["Hold on! Your route runs {inside_m} m through the quiet zone around my {site}, and {months_span} we need calm."],
     "route.thanks": ["The detour is only {extra_m} m longer, {extra_min}. Take it and we're good neighbours. {catchphrase}"],
     "route.too_long": ["I know the detour is {extra_m} m longer. Fine, use the short way, but please {conditions}."],
     "route.conditions": ["There's no way around my {site}, so pass by, but please {conditions}."],
@@ -68,23 +68,27 @@ DEFAULT_PHRASEBOOK: dict[str, list[str]] = {
 SIGNATURES = {"bird": "feather", "mammal": "paw print", "insect": "tiny pollen smudge"}
 
 
-def format_months(months: list[int] | None, short: bool = False) -> str:
-    """[5,6,7,8,9] -> 'May-September'; [11,12,1,2,3] -> 'November-March'."""
-    if not months:
-        return "no particular months"
-    names = MONTHS_SHORT if short else MONTHS
-    present = sorted(set(int(m) for m in months))
-    if len(present) == 12:
-        return "all year"
-    # Build circular runs of consecutive months.
+def _month_runs(months: list[int]) -> list[list[int]]:
+    """Circular runs of consecutive months: [1,2,11,12] -> [[11,12,1,2]]."""
     runs: list[list[int]] = []
-    for m in present:
+    for m in sorted(set(int(m) for m in months)):
         if runs and m == runs[-1][-1] + 1:
             runs[-1].append(m)
         else:
             runs.append([m])
     if len(runs) > 1 and runs[0][0] == 1 and runs[-1][-1] == 12:
         runs[0] = runs.pop() + runs[0]
+    return runs
+
+
+def format_months(months: list[int] | None, short: bool = False) -> str:
+    """[5,6,7,8,9] -> 'May-September'; [11,12,1,2,3] -> 'November-March'."""
+    if not months:
+        return "no particular months"
+    names = MONTHS_SHORT if short else MONTHS
+    if len(set(int(m) for m in months)) == 12:
+        return "all year"
+    runs = _month_runs(months)
     parts = []
     for run in runs:
         if len(run) == 1:
@@ -92,6 +96,22 @@ def format_months(months: list[int] | None, short: bool = False) -> str:
         else:
             parts.append(f"{names[run[0] - 1]}–{names[run[-1] - 1]}")
     return " and ".join(parts) if len(parts) <= 2 else ", ".join(parts[:-1]) + " and " + parts[-1]
+
+
+def months_span(months: list[int] | None) -> str:
+    """The same months as a phrase that reads well inside a sentence.
+
+    [3,4,5,6] -> 'from March to June'; [5] -> 'in May'; two seasons -> 'in May–August and November–March'.
+    """
+    if not months:
+        return "at no particular time"
+    if len(set(int(m) for m in months)) == 12:
+        return "all year round"
+    runs = _month_runs(months)
+    if len(runs) == 1:
+        run = runs[0]
+        return f"in {MONTHS[run[0] - 1]}" if len(run) == 1 else f"from {MONTHS[run[0] - 1]} to {MONTHS[run[-1] - 1]}"
+    return f"in {format_months(months)}"
 
 
 SITE_WORDS = {"bat": "roost", "fox": "den"}
@@ -142,6 +162,7 @@ class Voice:
             "buffer_m": _num(s.preferred_buffer_m),
             "min_buffer_m": _num(s.min_buffer_m),
             "months": format_months(s.sensitive_months),
+            "months_span": months_span(s.sensitive_months),
             "range_m": _num(s.foraging_range_m),
             "diet": ", ".join(s.diet) if s.diet else "whatever I can find",
             "fact": s.facts[0] if s.facts else "",

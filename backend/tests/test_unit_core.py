@@ -124,3 +124,13 @@ def test_weights_are_normalised_and_grades():
     assert grade(70)[0] == "Good neighbours"
     assert grade(55)[0] == "Fragile truce"
     assert grade(20)[0] == "Conflict persists"
+
+
+def test_months_span_reads_well_in_a_sentence():
+    from app.services.representative import months_span
+
+    assert months_span([3, 4, 5, 6]) == "from March to June"
+    assert months_span([5]) == "in May"
+    assert months_span([11, 12, 1, 2]) == "from November to February"
+    assert months_span([5, 6, 7, 8, 11, 12, 1, 2, 3]) == "in November–March and May–August"
+    assert months_span(list(range(1, 13))) == "all year round"

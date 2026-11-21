@@ -102,6 +102,8 @@ free, open-source model running on your own computer. No account, no API key, no
    LLM_ENABLED=true
    LLM_BASE_URL=http://localhost:11434/v1
    LLM_MODEL=qwen2.5:7b
+   LLM_TEMPERATURE=0.9        # optional: higher = livelier and more varied
+   LLM_CACHE_SECONDS=120      # optional: the same request within 2 minutes gets the same reply
    ```
    With Docker: `LLM_ENABLED=true docker compose up` (it already points at `host.docker.internal:11434`).
 4. Check `http://localhost:8000/health`: `llm.reachable` and `llm.model_ready` should both be `true`.
@@ -248,7 +250,7 @@ backend/
 │   │   └── geo.py, seasons.py, context.py
 │   └── seed/                   species data, the Brussels dataset, the demo story
 ├── alembic/                    database migrations
-└── tests/                      pytest (93 tests)
+└── tests/                      pytest (95 tests)
 ```
 
 ### Design choices (and why)

@@ -3,6 +3,9 @@
 It speaks the common OpenAI-style chat format (POST {LLM_BASE_URL}/chat/completions),
 so any compatible server works: Ollama, LM Studio, llama.cpp's server...
 
+Replies are cached for LLM_CACHE_SECONDS (default 2 minutes): asking the same
+thing again right away is instant, and later you get a fresh, different reply.
+
 Nothing depends on it. When it is off, unreachable or slow, `LLMError` is raised
 and callers keep their template text. After a connection failure we wait
 `COOLDOWN_S` before trying again, so a stopped Ollama doesn't slow every request.
@@ -39,7 +42,7 @@ COOLDOWN_S = 30.0
 CACHE_MAX = 500
 
 _lock = threading.Lock()
-_cache: dict[str, dict[str, Any]] = {}
+_cache: dict[str, tuple[float, dict[str, Any]]] = {}
 _down_until = 0.0
 _paused: contextvars.ContextVar[bool] = contextvars.ContextVar("llm_paused", default=False)
 
@@ -120,8 +123,8 @@ def chat_json(system: str, user: str) -> dict[str, Any]:
     key = hashlib.sha256(json.dumps(body, sort_keys=True).encode()).hexdigest()
     with _lock:
         hit = _cache.get(key)
-    if hit is not None:
-        return hit
+    if hit is not None and time.monotonic() - hit[0] < settings.llm_cache_seconds:
+        return hit[1]
     url = f"{_base()}/chat/completions"
     try:
         with client_factory() as client:
@@ -137,9 +140,10 @@ def chat_json(system: str, user: str) -> dict[str, Any]:
         raise LLMError("unexpected reply format from the LLM server") from exc
     data = parse_json_object(content or "")
     with _lock:
+        _cache.pop(key, None)
         if len(_cache) >= CACHE_MAX:
             _cache.pop(next(iter(_cache)))
-        _cache[key] = data
+        _cache[key] = (time.monotonic(), data)
     return data
 
 

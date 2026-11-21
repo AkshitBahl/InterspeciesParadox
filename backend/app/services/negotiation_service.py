@@ -259,7 +259,7 @@ def accept(
              text=f"I accept '{solution.title}'.", user=user, solution=solution)
     v = Voice(species, species.representative)
     v.say("accept", seed="final", fact=species.facts[0] if species.facts else "")
-    v.raw(f"Remember: {format_months(species.sensitive_months)} is our sensitive season, and I'll be watching from my {site_word(species)}.")
+    v.raw(f"Remember: our sensitive months are {format_months(species.sensitive_months)}, and I'll be watching from my {site_word(species)}.")
     v.ground_season()
     _rep_message(db, session, llm_voice.speak(v, "negotiation_accept"), MessageKind.REPRESENTATIVE_REPLY, solution)
     db.flush()

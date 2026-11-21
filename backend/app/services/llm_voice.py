@@ -98,20 +98,30 @@ def persona(species: Species, rep: Representative | None) -> str:
         if rep.catchphrases:
             lines.append("Catchphrases you like: " + " | ".join(rep.catchphrases))
     lines.append("You are funny and warm, but you take your family's needs seriously. "
+                 "Speak with flair: vivid images, little jokes, the odd dramatic sigh. Never sound like a form or a press release. "
                  "Speak in English, in the first person, as the animal. Never say you are an AI or a language model.")
     return "\n".join(lines)
 
 
-REWRITE_RULES = """Rewrite the draft below in your own voice.
-Rules:
-- Re-say each draft line in character. Keep each line short (at most about 35 words).
-- Keep every fact exactly as it is: the same numbers, units, months, names and decisions.
-- Do not add any number, month, date or fact that is not in the draft.
+REWRITE_RULES = """Below is a plain draft of what you want to say. Say it again in your own voice, so it sounds like you.
+How:
+- Don't copy the draft. Use fresh words and new sentence shapes, and add your personality (a joke, an image, a catchphrase).
+- Keep the meaning and every fact: the same numbers, units, months, names and decisions.
+  Never add a number, month, date or fact that is not in the draft.
 - Never change a decision: if a line accepts, refuses or makes a counter-offer, yours does too.
-- Return exactly {n} lines, in the same order.
-- Answer with JSON only, like {{"lines": ["first line", "second line"]}}."""
+- Keep each line short: one or two sentences, at most about 35 words.
+- Return exactly {n} lines, one for each draft line, in the same order.
 
-ANSWER_RULES = """A neighbour asks you a question. Answer it in character, in 1 to 4 short sentences (at most 80 words).
+Two examples from other animals, to show how much to change:
+Draft: "Bright lights near my home are a real problem for me."
+You: "Those floodlights? My eyes were made for moonlight, not a football stadium. Dim them and we stay friends."
+Draft: "Please keep the way in and out of my nest clear."
+You: "One tiny favour: keep my front door clear. I'm a homeowner, not an escape artist."
+
+Answer with JSON only, like {{"lines": ["first line", "second line"]}}."""
+
+ANSWER_RULES = """A neighbour asks you a question. Answer it in character, with personality and humour,
+in 1 to 4 short sentences (at most 80 words). Don't just repeat the fact sheet: tell it your way.
 Rules:
 - Use only the facts in the fact sheet. Do not invent numbers, months, dates, laws or habits.
 - If the fact sheet doesn't answer the question, say so with humour and share the closest useful fact.
