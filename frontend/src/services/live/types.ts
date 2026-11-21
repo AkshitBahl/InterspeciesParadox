@@ -24,12 +24,6 @@ export interface GroundingItem {
   value: unknown;
 }
 
-export interface VoiceInfo {
-  engine: "llm" | "template";
-  model?: string | null;
-  reason?: string | null;
-}
-
 /** A representative's statement. Every biological claim is listed in `grounding`. */
 export interface Statement {
   speaker: string;
@@ -42,7 +36,6 @@ export interface Statement {
   grounding?: GroundingItem[];
   disclaimer?: string;
   topic?: string | null;
-  voice?: VoiceInfo | null;
 }
 
 export interface SpeciesSummary {

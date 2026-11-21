@@ -7,8 +7,7 @@ How it stays honest:
 3. Each statement returns a `grounding` list that says exactly which data field
    each claim came from, so the UI can show "based on: breeding season May-Sep".
 
-No language model is needed: templates are deterministic and testable.
-(An optional free local model can re-word them: see llm_voice.py.)
+No language model is used: templates are deterministic, testable and need no extra energy.
 """
 
 import hashlib

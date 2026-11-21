@@ -1,4 +1,4 @@
-"""The map API: GeoJSON layers, user-added features, scenarios, animations and the LLM export."""
+"""The map API: GeoJSON layers, user-added features, scenarios, animations and the Markdown export."""
 
 from app.seed.brussels_dataset import ll
 from tests.helpers import API, conflict_by_title, solutions_by_strategy
@@ -138,7 +138,7 @@ def test_animations(client):
     assert len(with_streets["tracks"]) >= len(anim["tracks"])
 
 
-def test_markdown_export_for_an_llm(client):
+def test_markdown_export_of_a_conflict_area(client):
     fox = conflict_by_title(client, "Fox")
     r = client.post(f"{API}/map/export/markdown", json={"conflict_id": fox["id"], "question": "Where should the fence go?", "include_geojson": True})
     assert r.status_code == 200, r.text

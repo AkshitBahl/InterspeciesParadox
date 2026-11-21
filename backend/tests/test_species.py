@@ -40,3 +40,15 @@ def test_ask_the_representative(client):
 
     when = client.post(f"{API}/species/house-martin/representative/ask", json={"question": "When will you leave?"}).json()
     assert any(g["source"] in ("species.active_months", "species.sensitive_months", "species.sensitive_periods") for g in when["grounding"])
+
+
+def test_any_question_gets_a_grounded_template_answer(client):
+    """No language model: an off-topic question still gets an in-character answer from the data."""
+    first = client.post(f"{API}/species/european-hedgehog/representative/ask", json={"question": "Do you like jazz?"}).json()
+    again = client.post(f"{API}/species/european-hedgehog/representative/ask", json={"question": "Do you like jazz?"}).json()
+    assert first["topic"] == "fun_fact"
+    assert first["text"].startswith("Fun fact:")
+    assert first["grounding"][0]["source"] == "species.facts"
+    assert first == again  # templates are repeatable
+    assert "voice" not in first
+    assert "llm" not in client.get("/health").json()
