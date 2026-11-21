@@ -12,21 +12,14 @@ export default function Button({
 }: ButtonProps) {
   const styles = {
     primary: "bg-forest text-white hover:bg-leaf",
-    secondary:
-      "border border-forest/15 bg-white text-forest hover:bg-sage/30",
+    secondary: "border border-forest/15 bg-white text-forest hover:bg-sage/30",
   };
 
   return (
     <button
       type={type}
-      className={`
-        inline-flex items-center justify-center gap-2
-        rounded-xl px-5 py-3 text-sm font-semibold
-        transition-all duration-200
-        disabled:cursor-not-allowed disabled:opacity-50
-        ${styles[variant]} ${className}
-      `}
+      className={`kinship-button inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${styles[variant]} ${className}`}
       {...props}
     />
   );
-}   
+}
