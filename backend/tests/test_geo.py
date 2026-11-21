@@ -196,6 +196,8 @@ def test_negotiation_reroutes_around_the_fox(client, fox_on_the_avenue):
     assert [s["kind"] for s in d["steps"]] == ["initial_route", "wildlife_on_route", "objection", "reply", "agreement"]
     roles = {f["properties"]["role"] for f in d["geojson"]["features"]}
     assert roles == {"initial_route", "negotiated_route", "crossed_zone", "wildlife_on_route"}
+    negotiated = next(f for f in d["geojson"]["features"] if f["properties"]["role"] == "negotiated_route")
+    assert negotiated["properties"]["stroke"]  # also readable in geojson.io
 
 
 def test_negotiation_sets_conditions_when_the_detour_is_too_long(client, fox_on_the_avenue):

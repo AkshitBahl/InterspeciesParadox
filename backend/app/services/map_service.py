@@ -26,7 +26,7 @@ from app.models import (
     Species,
 )
 from app.services import geo
-from app.services.layers import LAYERS
+from app.services.layers import LAYERS, simplestyle
 
 
 def set_bbox(feature: MapFeature) -> None:
@@ -127,6 +127,7 @@ def feature_to_geojson(
     today: date | None = None,
     species: dict[uuid.UUID, Species] | None = None,
     scenario_role: str | None = None,
+    with_simplestyle: bool = False,
 ) -> dict[str, Any]:
     today = today or clock.today()
     sp = species.get(feature.species_id) if species and feature.species_id else None
@@ -155,6 +156,8 @@ def feature_to_geojson(
     )
     if scenario_role:
         props["scenario_role"] = scenario_role
+    if with_simplestyle:
+        props.update(simplestyle(feature.layer, feature.geometry["type"], props))
     return {"type": "Feature", "id": str(feature.id), "geometry": feature.geometry, "properties": props}
 
 
@@ -165,6 +168,7 @@ def feature_collection(
     today: date | None = None,
     roles: dict[uuid.UUID, str] | None = None,
     metadata: dict[str, Any] | None = None,
+    with_simplestyle: bool = False,
 ) -> dict[str, Any]:
     today = today or clock.today()
     species = species_lookup(db)
@@ -173,7 +177,7 @@ def feature_collection(
     fc: dict[str, Any] = {
         "type": "FeatureCollection",
         "features": [
-            feature_to_geojson(f, today=today, species=species, scenario_role=(roles or {}).get(f.id))
+            feature_to_geojson(f, today=today, species=species, scenario_role=(roles or {}).get(f.id), with_simplestyle=with_simplestyle)
             for f in features
         ],
     }

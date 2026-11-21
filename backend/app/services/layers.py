@@ -313,3 +313,54 @@ def layer_info(key: str) -> dict[str, Any]:
         if layer["key"] == key:
             return layer
     raise KeyError(key)
+
+
+# --- simplestyle-spec (geojson.io, GitHub previews, QGIS...) -------------------------
+# MapLibre ignores these; they only make the raw GeoJSON readable in simple viewers.
+# Humans are blue, animals and their homes are orange/red, people's paths blue lines,
+# animal corridors green lines, quiet zones yellow circles.
+
+_POINT_STYLE = {
+    "resident": ("#1565c0", "large", "pitch"),
+    "wildlife": ("#ef6c00", "large", "zoo"),
+    "wildlife_site": ("#b71c1c", "medium", "animal-shelter"),
+    "conflict_hotspot": ("#d50000", "large", "danger"),
+    "intervention": ("#6a1b9a", "medium", "hardware"),
+    "entrance": ("#546e7a", "small", "entrance"),
+    "point_of_interest": ("#00838f", "small", "marker"),
+}
+_LINE_STYLE = {
+    "human_route": ("#1e88e5", 3, 0.9),
+    "delivery_route": ("#fb8c00", 2, 0.9),
+    "wildlife_corridor": ("#2e7d32", 2, 0.8),
+    "barrier": ("#212121", 4, 1.0),
+}
+_FILL_STYLE = {
+    "building": ("#757575", "#9e9e9e", 0.6),
+    "habitat_zone": ("#2e7d32", "#81c784", 0.35),
+    "ecological_buffer": ("#ff8f00", "#ffca28", 0.3),
+    "agreed_zone": ("#00796b", "#4db6ac", 0.4),
+}
+
+
+def simplestyle(layer: str, geometry_type: str, props: dict[str, Any]) -> dict[str, Any]:
+    """simplestyle-spec properties for one feature."""
+    role = props.get("scenario_role")
+    if geometry_type in ("Point", "MultiPoint"):
+        color, size, symbol = _POINT_STYLE.get(layer, ("#7e57c2", "small", "circle"))
+        return {"marker-color": color, "marker-size": size, "marker-symbol": symbol}
+    if geometry_type in ("LineString", "MultiLineString"):
+        color, width, opacity = _LINE_STYLE.get(layer, ("#424242", 2, 0.8))
+        if layer == "human_route" and props.get("kind") == "street":
+            color, width, opacity = "#9e9e9e", 4, 0.6  # plain streets stay in the background
+        if role == "replaced":
+            opacity = 0.25
+        elif role == "proposed":
+            width += 2
+        return {"stroke": color, "stroke-width": width, "stroke-opacity": opacity}
+    stroke, fill, opacity = _FILL_STYLE.get(layer, ("#424242", "#bdbdbd", 0.3))
+    if layer == "ecological_buffer" and not props.get("active_now", True):
+        opacity = 0.08  # out of season: barely visible
+    if role == "replaced":
+        opacity = 0.1
+    return {"stroke": stroke, "stroke-width": 2 if role == "proposed" else 1, "stroke-opacity": 0.9, "fill": fill, "fill-opacity": opacity}

@@ -139,6 +139,7 @@ def get_features(
     active_on: date | None = Query(None, description="Only features active on this date (seasonal buffers)"),
     scenario: Literal["current", "proposed"] = "current",
     solution_id: uuid.UUID | None = Query(None, description="Required for the proposed scenario"),
+    simplestyle: bool = Query(False, description="Add marker-color / stroke / fill properties so geojson.io and other simple viewers colour each layer"),
 ) -> dict:
     """GeoJSON FeatureCollection for MapLibre. Every feature has `properties.layer`."""
     roles: dict[uuid.UUID, str] = {}
@@ -157,7 +158,10 @@ def get_features(
             raise HTTPException(status_code=404, detail="Species not found")
         species_id = sp.id
     feats = filter_features(feats, layers=_layers(layers), bbox=_parse_bbox(bbox), species_id=species_id, conflict_id=conflict_id, active_on=active_on)
-    return feature_collection(db, feats, roles=roles, metadata={"scenario": scenario, "solution_id": str(solution_id) if solution_id else None, "count": len(feats), "date": clock.today().isoformat()})
+    return feature_collection(
+        db, feats, roles=roles, with_simplestyle=simplestyle,
+        metadata={"scenario": scenario, "solution_id": str(solution_id) if solution_id else None, "count": len(feats), "date": clock.today().isoformat()},
+    )
 
 
 @router.get("/locations")
@@ -246,12 +250,12 @@ def delete_feature(feature_id: uuid.UUID, user: CurrentUser, db: DbSession) -> N
 
 
 @router.get("/scenarios/{solution_id}")
-def proposed_scenario(solution_id: uuid.UUID, db: DbSession) -> dict:
+def proposed_scenario(solution_id: uuid.UUID, db: DbSession, simplestyle: bool = Query(False, description="Add marker-color / stroke / fill properties so geojson.io and other simple viewers colour each layer")) -> dict:
     """The map as it would look with this solution. New features have `scenario_role: "proposed"`."""
     solution = get_or_404(db, Solution, solution_id, "Solution")
     feats, added, replaced = proposed_scenario_features(db, solution)
     return feature_collection(
-        db, feats, roles={f.id: "proposed" for f in added},
+        db, feats, roles={f.id: "proposed" for f in added}, with_simplestyle=simplestyle,
         metadata={"scenario": "proposed", "solution_id": str(solution.id), "solution_title": solution.title,
                   "coexistence_index": solution.coexistence_index, "replaced_feature_ids": [str(f.id) for f in replaced]},
     )
@@ -332,12 +336,13 @@ def export_markdown_text(
 
 @router.get("/export/geojson")
 def export_geojson(
-    db: DbSession, scenario: Literal["current", "proposed"] = "current", solution_id: uuid.UUID | None = None
+    db: DbSession, scenario: Literal["current", "proposed"] = "current", solution_id: uuid.UUID | None = None,
+    simplestyle: bool = Query(False, description="Add marker-color / stroke / fill properties so geojson.io and other simple viewers colour each layer"),
 ) -> dict:
     """The full dataset as a downloadable GeoJSON file."""
     if scenario == "proposed":
         if solution_id is None:
             raise HTTPException(status_code=422, detail="solution_id is required for the proposed scenario")
         feats, added, _ = proposed_scenario_features(db, get_or_404(db, Solution, solution_id, "Solution"))
-        return feature_collection(db, feats, roles={f.id: "proposed" for f in added})
-    return feature_collection(db, current_scenario_features(db), metadata={"neighbourhood": NEIGHBOURHOOD})
+        return feature_collection(db, feats, roles={f.id: "proposed" for f in added}, with_simplestyle=simplestyle)
+    return feature_collection(db, current_scenario_features(db), metadata={"neighbourhood": NEIGHBOURHOOD}, with_simplestyle=simplestyle)

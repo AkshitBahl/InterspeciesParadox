@@ -169,3 +169,17 @@ def test_markdown_export_with_drawn_polygon_and_extra_features(client):
 def test_geojson_download(client):
     fc = client.get(f"{API}/map/export/geojson").json()
     assert fc["type"] == "FeatureCollection" and fc["metadata"]["neighbourhood"]["name"]
+
+
+def test_simplestyle_colours_for_geojson_io(client):
+    plain = client.get(f"{API}/map/features").json()["features"]
+    assert not any("marker-color" in f["properties"] or "stroke" in f["properties"] for f in plain)
+
+    styled = client.get(f"{API}/map/features", params={"simplestyle": True}).json()["features"]
+    colour = {f["properties"]["layer"]: f["properties"].get("marker-color") for f in styled if f["geometry"]["type"] == "Point"}
+    assert colour["resident"] != colour["wildlife"]  # humans and animals look different
+    building = next(f for f in styled if f["properties"]["layer"] == "building")
+    assert building["properties"]["fill"] and building["properties"]["fill-opacity"] > 0
+    assert all("stroke" in f["properties"] for f in styled if f["geometry"]["type"] == "LineString")
+    export = client.get(f"{API}/map/export/geojson", params={"simplestyle": True}).json()["features"]
+    assert all(("marker-color" in f["properties"]) or ("stroke" in f["properties"]) for f in export)

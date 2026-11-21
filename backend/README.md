@@ -170,6 +170,13 @@ Useful map endpoints:
 
 Markers: every feature has `properties.emoji` (🐦 🦇 🐝 🦔 🦊 🏠 🚲 ...) for HTML markers or labels.
 
+Quick look without a frontend: open `http://localhost:8000/api/v1/map/features?simplestyle=true`, copy the JSON and
+paste it into [geojson.io](https://geojson.io). With `simplestyle=true` every feature gets `marker-color`, `stroke` and
+`fill` properties: humans blue, animals orange, nests dark red, quiet zones yellow, habitats green, buildings grey.
+The same flag works on `/map/scenarios/{solution_id}` and `/map/export/geojson`. The demo district is a fictional
+2126 layout drawn with simple shapes (straight streets, rectangular buildings), placed near the real Ixelles ponds
+but not traced from real streets.
+
 ### Routing and search
 
 * Routing uses **OSRM** on real OpenStreetMap streets (`routing.openstreetmap.de`). If it is unreachable, the API
@@ -209,7 +216,7 @@ backend/
 │   │   └── geo.py, seasons.py, context.py
 │   └── seed/                   species data, the Brussels dataset, the demo story
 ├── alembic/                    database migrations
-└── tests/                      pytest (79 tests)
+└── tests/                      pytest (80 tests)
 ```
 
 ### Design choices (and why)

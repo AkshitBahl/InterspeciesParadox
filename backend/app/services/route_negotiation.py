@@ -80,6 +80,14 @@ def _affected(route: dict[str, Any], species_by_name: dict[str, Species]) -> lis
     return sorted(rows, key=lambda x: -x[1])
 
 
+# simplestyle-spec colours, so the result also reads well when pasted into geojson.io.
+ROUTE_STYLE = {
+    "initial_route": {"stroke": "#e53935", "stroke-width": 5, "stroke-opacity": 0.8},
+    "negotiated_route": {"stroke": "#2e7d32", "stroke-width": 6, "stroke-opacity": 0.9},
+    "detour_offered": {"stroke": "#f9a825", "stroke-width": 4, "stroke-opacity": 0.8},
+}
+
+
 def _route_feature(route: dict[str, Any], role: str) -> dict[str, Any]:
     return {
         "type": "Feature",
@@ -93,6 +101,7 @@ def _route_feature(route: dict[str, Any], role: str) -> dict[str, Any]:
             "distance_m": route["distance_m"],
             "duration_s": route["duration_s"],
             "disturbance_score": route["wildlife"]["disturbance_score"],
+            **ROUTE_STYLE[role],
         },
     }
 
@@ -199,7 +208,8 @@ def negotiate_route(
             "id": f"crossed_zone:{c['feature_id']}",
             "geometry": by_id[c["feature_id"]].geometry,
             "properties": {"layer": "route", "role": "crossed_zone", "name": c["name"], "species": c["species"],
-                           "emoji": c["species_emoji"], "length_inside_m": c["length_inside_m"]},
+                           "emoji": c["species_emoji"], "length_inside_m": c["length_inside_m"],
+                           "stroke": "#ff6f00", "stroke-width": 2, "fill": "#ffca28", "fill-opacity": 0.4},
         }
         for c in initial["wildlife"]["crosses_buffers"] if c["feature_id"] in by_id
     ]
@@ -208,7 +218,14 @@ def negotiate_route(
             "type": "Feature",
             "id": f"wildlife_on_route:{n['feature_id']}",
             "geometry": n["geometry"],
-            "properties": {"layer": "route", "role": "wildlife_on_route", **{k: v for k, v in n.items() if k != "geometry"}},
+            "properties": {
+                "layer": "route", "role": "wildlife_on_route", **{k: v for k, v in n.items() if k != "geometry"},
+                **(
+                    {"stroke": "#2e7d32", "stroke-width": 3, "stroke-opacity": 0.8}
+                    if n["layer"] == "wildlife_corridor"
+                    else {"marker-color": "#d50000" if n["disturbed_by_route"] else "#ef6c00", "marker-size": "medium", "marker-symbol": "zoo"}
+                ),
+            },
         }
         for n in nearby
     ]
