@@ -1,0 +1,40 @@
+# Start everything with:  docker compose up --build
+# API docs:              http://localhost:8000/docs
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: paradox
+      POSTGRES_PASSWORD: paradox
+      POSTGRES_DB: interspecies
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paradox -d interspecies"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+psycopg://paradox:paradox@db:5432/interspecies
+      JWT_SECRET_KEY: docker-dev-secret-change-me
+      SIMULATED_TODAY: "2126-05-20"
+      ENABLE_EXTERNAL_GEO: "true"
+      # Optional free LLM voice: run Ollama on your computer, then `LLM_ENABLED=true docker compose up`.
+      LLM_ENABLED: "${LLM_ENABLED:-false}"
+      LLM_BASE_URL: "http://host.docker.internal:11434/v1"
+      LLM_MODEL: "${LLM_MODEL:-qwen2.5:7b}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
