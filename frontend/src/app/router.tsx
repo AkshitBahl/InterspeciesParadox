@@ -1,3 +1,4 @@
+import ProfilePage from "../features/profile/ProfilePage";
 import { createBrowserRouter } from "react-router-dom";
 
 import AppLayout from "../components/layout/AppLayout";
@@ -25,13 +26,13 @@ export const router = createBrowserRouter([
     element: <AppLayout />,
     children: [
       {
-        index: true,
-        element: <DashboardPage />,
-      },
-      {
-        path: "profile",
-        element: <ComingSoon title="My Profile" />,
-      },
+    index: true,
+    element: <DashboardPage />,
+  },
+  {
+    path: "profile",
+    element: <ProfilePage />,
+  },
       {
         path: "conflict/new",
         element: <ComingSoon title="Report a Conflict" />,
