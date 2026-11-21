@@ -1,0 +1,26 @@
+/* Step 10: character movement. CSS-only; no timers, sound, or additional libraries. */
+@keyframes kinship-bob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-6px) rotate(2deg); }
+}
+
+@keyframes kinship-talk {
+  from { opacity: 0; transform: translateY(7px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.kinship-wildlife-emoji {
+  animation: kinship-bob 3.2s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.kinship-dialogue-appear {
+  animation: kinship-talk 260ms cubic-bezier(.2,.7,.2,1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kinship-wildlife-emoji,
+  .kinship-dialogue-appear {
+    animation: none;
+  }
+}
