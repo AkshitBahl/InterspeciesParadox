@@ -1,10 +1,10 @@
+import { lazy, Suspense } from "react";
+import { createBrowserRouter, type RouteObject } from "react-router-dom";
 import AssessmentPage from "../features/assessment/AssessmentPage";
 import ReportConflictPage from "../features/conflict/ReportConflictPage";
 import ProfilePage from "../features/profile/ProfilePage";
-import { createBrowserRouter, type RouteObject } from "react-router-dom";
 import MediationPage from "../features/mediation/MediationPage";
 import AgreementPage from "../features/agreement/AgreementPage";
-
 import AppLayout from "../components/layout/AppLayout";
 import DashboardPage from "../features/dashboard/DashboardPage";
 
@@ -16,9 +16,15 @@ import LiveAssessmentPage from "../features/live/LiveAssessmentPage";
 import LiveMediationPage from "../features/live/LiveMediationPage";
 import LiveAgreementPage from "../features/live/LiveAgreementPage";
 
+// Only the prologue is new. Everything below retains its existing route and logic.
+// Lazy loading keeps the scene and its illustration out of the normal app bundle.
+// (The router file is not hot-reloaded as a component, so this lint rule doesn't apply.)
+// eslint-disable-next-line react-refresh/only-export-components
+const IntroPage = lazy(() => import("../features/intro/IntroPage"));
+
 // Mock mode (VITE_USE_MOCKS=true): everything runs in the browser with demo data.
 const mockRoutes: RouteObject[] = [
-  { index: true, element: <DashboardPage /> },
+  { path: "dashboard", element: <DashboardPage /> },
   { path: "profile", element: <ProfilePage /> },
   { path: "conflict/new", element: <ReportConflictPage /> },
   { path: "conflict/:id/assessment", element: <AssessmentPage /> },
@@ -28,7 +34,7 @@ const mockRoutes: RouteObject[] = [
 
 // Live mode (VITE_USE_MOCKS=false): the same screens, backed by the FastAPI backend.
 const liveRoutes: RouteObject[] = [
-  { index: true, element: <DashboardPage /> },
+  { path: "dashboard", element: <DashboardPage /> },
   { path: "login", element: <LoginPage /> },
   {
     element: <RequireLogin />,
@@ -45,6 +51,13 @@ const liveRoutes: RouteObject[] = [
 export const router = createBrowserRouter([
   {
     path: "/",
+    element: (
+      <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-forest text-cream">Growing your neighborhood…</div>}>
+        <IntroPage />
+      </Suspense>
+    ),
+  },
+  {
     element: <AppLayout />,
     children: USE_MOCKS ? mockRoutes : liveRoutes,
   },

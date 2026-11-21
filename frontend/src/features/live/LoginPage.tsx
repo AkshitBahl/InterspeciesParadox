@@ -14,7 +14,7 @@ const inputStyle =
 export default function LoginPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const next = params.get("next") || "/";
+  const next = params.get("next") || "/dashboard";
   const [email, setEmail] = useState(demoAccounts[4].email);
   const [password, setPassword] = useState(DEMO_PASSWORD);
   const [busy, setBusy] = useState(false);
@@ -26,7 +26,7 @@ export default function LoginPage() {
     setError("");
     try {
       await login(email.trim(), password);
-      navigate(next.startsWith("/") ? next : "/", { replace: true });
+      navigate(next.startsWith("/") ? next : "/dashboard", { replace: true });
     } catch (err) {
       setError(errorMessage(err));
     } finally {

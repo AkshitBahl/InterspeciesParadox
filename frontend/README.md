@@ -22,7 +22,8 @@ React 19 + Vite + Tailwind + Leaflet. The app has two modes:
    npm install
    npm run dev
    ```
-3. Open http://localhost:5173, click **Log in**, pick a demo resident (password `coexist2126`).
+3. Open http://localhost:5173. It starts with the playable intro; press **Skip experience** (or go to
+   http://localhost:5173/dashboard), then click **Log in** and pick a demo resident (password `coexist2126`).
    Noor has a fresh fox case to take through every step; Lina's house martin case already has an active agreement.
 
 ## Where the live code lives
@@ -32,5 +33,6 @@ React 19 + Vite + Tailwind + Leaflet. The app has two modes:
 - `src/features/live/` — the live pages: login, report, assessment, mediation (plans, map, Coexistence Index,
   negotiation), agreement, recent cases, and the species representative panel with "Ask".
 - `src/app/router.tsx` picks the live or mock pages from `VITE_USE_MOCKS`. The mock pages are unchanged.
+  `/` is the intro (`src/features/intro/`) in both modes, and the dashboard lives at `/dashboard`.
 - Shared components (`ConflictForm`, `ConflictCard`, `NeedsCard`, `WildlifeProfile`, `Card`, `Button`…) are reused
   in both modes; live mode passes a few optional props.
