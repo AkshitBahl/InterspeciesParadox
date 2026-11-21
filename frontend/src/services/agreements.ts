@@ -4,7 +4,7 @@ import type {
   AgreementPreview,
   AgreementTerm,
   SavedAgreementDraft,
-} from "../types/agreement";
+} from "../types/agreements";
 
 const storageKey = (conflictId: string) =>
   `interspecies-agreement:${conflictId}`;

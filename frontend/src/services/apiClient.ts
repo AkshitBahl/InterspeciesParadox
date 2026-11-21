@@ -39,6 +39,16 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
       if (payload && typeof payload === "object" && "detail" in payload) {
         const detail = (payload as { detail: unknown }).detail;
         if (typeof detail === "string") message = detail;
+        // FastAPI validation errors (422) send a list: [{ loc, msg, type }, ...]
+        else if (Array.isArray(detail) && detail.length > 0) {
+          message = detail
+            .map((item) => {
+              const entry = item as { loc?: unknown[]; msg?: string };
+              const field = Array.isArray(entry.loc) ? entry.loc.filter((part) => part !== "body").join(".") : "";
+              return field ? `${field}: ${entry.msg ?? "invalid"}` : (entry.msg ?? "invalid");
+            })
+            .join("; ");
+        }
       }
     } catch {
       // Keep the default message for non-JSON error bodies.

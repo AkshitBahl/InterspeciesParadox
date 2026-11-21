@@ -1,5 +1,7 @@
 # Interspecies Paradox — draft frontend/backend contract
 
+> **Update:** live mode (`VITE_USE_MOCKS=false`) now uses the real backend API under `/api/v1` (JWT login, snake_case). See `README.md` and `src/services/live/`. This draft is kept for history.
+
 This is a **proposal**, not an already implemented API. Frontend and backend teams should agree on names and shapes before turning off mock mode.
 
 ## Local dev

@@ -16,7 +16,7 @@ import {
 } from "../../services/agreements";
 import { useHumanProfile } from "../../hooks/useHumanProfile";
 import { evaluatePlan } from "../mediation/mediationLogic";
-import type { SavedAgreementDraft } from "../../types/agreement";
+import type { SavedAgreementDraft } from "../../types/agreements";
 import AgreementCard from "./AgreementCard";
 
 export default function AgreementPage() {

@@ -11,12 +11,17 @@ import type { ConflictReport } from "../../types";
 
 interface ConflictCardProps {
   conflict: ConflictReport;
+  /** Live mode: the species as the backend names it. */
+  species?: { name: string; emoji: string };
+  statusLabel?: string;
 }
 
 export default function ConflictCard({
   conflict,
+  species,
+  statusLabel = "Reported",
 }: ConflictCardProps) {
-  const animal = wildlifeOptions.find(
+  const animal = species ?? wildlifeOptions.find(
     (item) => item.id === conflict.speciesId
   );
 
@@ -34,7 +39,7 @@ export default function ConflictCard({
         </div>
 
         <span className="rounded-full bg-sage/40 px-3 py-1.5 text-xs font-semibold text-forest">
-          Reported
+          {statusLabel}
         </span>
       </div>
 

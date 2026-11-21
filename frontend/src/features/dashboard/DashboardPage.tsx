@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import LivingCityScene from "./LivingCityScene";
 import RecentCases from "./RecentCases";
+import LiveRecentCases from "../live/LiveRecentCases";
+import { USE_MOCKS } from "../../services/conflictGateway";
 
 const journey = [
   {
@@ -145,7 +147,7 @@ export default function DashboardPage() {
 
       <section className="kinship-recent-section">
         <div className="mb-6 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.19em] text-[#668774]"><ShieldCheck size={15}/> Private prototype workspace</div>
-        <RecentCases />
+        {USE_MOCKS ? <RecentCases /> : <LiveRecentCases />}
       </section>
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#AFC4B8]/50 pt-5 text-[10px] uppercase tracking-[0.18em] text-[#6B8A79]">

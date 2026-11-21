@@ -3,6 +3,8 @@ import { useState } from "react";
 
 import type { HumanProfile } from "../types";
 import { defaultHumanProfile } from "../mocks/humanProfile";
+import { USE_MOCKS } from "../services/conflictGateway";
+import { syncProfileToBackend } from "../services/live/profileSync";
 
 const STORAGE_KEY = "interspecies-human-profile";
 
@@ -48,7 +50,15 @@ export function useHumanProfile() {
         STORAGE_KEY,
         JSON.stringify(profile)
       );
-      setSaveStatus("saved");
+      if (USE_MOCKS) {
+        setSaveStatus("saved");
+      } else {
+        // Live mode: the backend uses your access needs and priorities in the assessment.
+        syncProfileToBackend(profile).then(
+          () => setSaveStatus("saved"),
+          () => setSaveStatus("error")
+        );
+      }
     } catch {
       setSaveStatus("error");
     }
