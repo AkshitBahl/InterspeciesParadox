@@ -21,7 +21,7 @@ from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
 from app.seed.loader import DEMO_PASSWORD, run
-from app.services import external
+from app.services import external, llm
 
 TEST_DATE = date(2126, 5, 20)
 
@@ -44,7 +44,9 @@ def db(engine) -> Iterator[Session]:
     """A fresh, fully seeded database for every test."""
     clock.set_today(TEST_DATE)
     settings.enable_external_geo = False
+    settings.llm_enabled = False  # tests never call a real model, whatever .env says
     external.clear_cache()
+    llm.reset()
     SessionTest = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
     with SessionTest() as session:
         run(session, do_reset=True)

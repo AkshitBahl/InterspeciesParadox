@@ -14,6 +14,7 @@ from app.schemas.species import (
     SpeciesRead,
     SpeciesSummary,
 )
+from app.services import llm_voice
 from app.services import representative as voice
 from app.services.representative import MONTHS
 
@@ -68,11 +69,16 @@ def species_calendar(slug: str, db: DbSession) -> SpeciesCalendar:
 def representative_introduction(slug: str, db: DbSession) -> dict:
     """The representative introduces itself (personality is fictional, facts are grounded)."""
     s = _get(db, slug)
-    return voice.introduction(s, s.representative)
+    return llm_voice.rewrite(voice.introduction(s, s.representative), s, s.representative)
 
 
 @router.post("/{slug}/representative/ask", response_model=Statement)
 def ask_representative(slug: str, body: AskRequest, db: DbSession) -> dict:
-    """Ask the representative anything. It answers in character, using only structured data."""
+    """Ask the representative anything. It answers in character, using only structured data.
+
+    With LLM_ENABLED=true a local model answers any question from the species' fact sheet;
+    otherwise (or if its reply fails the data check) one of 8 keyword topics is used.
+    """
     s = _get(db, slug)
-    return voice.answer_question(s, s.representative, body.question)
+    template = voice.answer_question(s, s.representative, body.question)
+    return llm_voice.answer(template, s, s.representative, body.question)

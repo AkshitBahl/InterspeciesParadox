@@ -8,6 +8,7 @@ How it stays honest:
    each claim came from, so the UI can show "based on: breeding season May-Sep".
 
 No language model is needed: templates are deterministic and testable.
+(An optional free local model can re-word them: see llm_voice.py.)
 """
 
 import hashlib

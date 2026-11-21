@@ -32,6 +32,7 @@ from app.models import (
     Species,
     User,
 )
+from app.services import llm_voice
 from app.services import representative as voice_mod
 from app.services.representative import Voice, format_months, site_word
 from app.services.solution_engine import assessment_dict, build_revision, persist_draft
@@ -114,7 +115,7 @@ def open_session(db: Session, conflict: Conflict, solution_id: uuid.UUID | None 
     v.raw(f"Let's start from '{start.title}'. {start.representative_comment.get('text', '')}".strip())
     v.ground_buffer()
     v.ground_season()
-    _rep_message(db, session, v.statement("negotiation_opening"), MessageKind.REPRESENTATIVE_REPLY, start)
+    _rep_message(db, session, llm_voice.speak(v, "negotiation_opening"), MessageKind.REPRESENTATIVE_REPLY, start)
     if conflict.status in (ConflictStatus.SOLUTIONS_PROPOSED, ConflictStatus.ASSESSED):
         conflict.status = ConflictStatus.NEGOTIATING
     db.flush()
@@ -136,7 +137,7 @@ def post_comment(db: Session, conflict: Conflict, session: NegotiationSession, u
     _require_open(session)
     species = _species(db, conflict)
     human = _message(db, session, author_type="human", author_name=user.display_name, kind=MessageKind.COMMENT, text=text, user=user)
-    answer = voice_mod.answer_question(species, species.representative, text)
+    answer = llm_voice.answer(voice_mod.answer_question(species, species.representative, text), species, species.representative, text)
     reply = _rep_message(db, session, answer, MessageKind.REPRESENTATIVE_REPLY, None)
     return [human, reply]
 
@@ -218,7 +219,7 @@ def counter_proposal(
         session.current_solution_id = revision.id
     v.ground(f"Wildlife wellbeing: {old_w:.0f} -> {new_w:.0f}", "coexistence_index.wildlife_wellbeing", {"before": old_w, "after": new_w})
 
-    reply = _rep_message(db, session, v.statement("negotiation_reply"), MessageKind.REPRESENTATIVE_REPLY, counter or revision,
+    reply = _rep_message(db, session, llm_voice.speak(v, "negotiation_reply"), MessageKind.REPRESENTATIVE_REPLY, counter or revision,
                          {"verdict": verdict, "revision_id": str(revision.id), "counter_solution_id": str(counter.id) if counter else None})
     db.flush()
     return {
@@ -260,6 +261,6 @@ def accept(
     v.say("accept", seed="final", fact=species.facts[0] if species.facts else "")
     v.raw(f"Remember: {format_months(species.sensitive_months)} is our sensitive season, and I'll be watching from my {site_word(species)}.")
     v.ground_season()
-    _rep_message(db, session, v.statement("negotiation_accept"), MessageKind.REPRESENTATIVE_REPLY, solution)
+    _rep_message(db, session, llm_voice.speak(v, "negotiation_accept"), MessageKind.REPRESENTATIVE_REPLY, solution)
     db.flush()
     return solution

@@ -16,8 +16,8 @@ from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
+from app.services import llm_voice, seasons
 from app.services import representative as voice
-from app.services import seasons
 from app.services.context import RECURRING_ACTIVITIES, MediationContext
 from app.services.representative import format_months, lower_name, site_word
 
@@ -588,8 +588,9 @@ def assess(ctx: MediationContext) -> dict[str, Any]:
     ]
     intensity = round(max((c["severity"] for c in conflicts), default=0.0), 2)
     summary = _summary(ctx, conflicts, compatible, intensity)
-    statement = voice.needs_statement(
-        ctx.species, ctx.representative, [n.as_dict() for n in animals], conflicts, compatible
+    statement = llm_voice.rewrite(
+        voice.needs_statement(ctx.species, ctx.representative, [n.as_dict() for n in animals], conflicts, compatible),
+        ctx.species, ctx.representative,
     )
     return {
         "human_needs": [n.as_dict() for n in humans],
