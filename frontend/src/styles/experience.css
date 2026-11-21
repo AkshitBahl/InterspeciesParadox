@@ -1,0 +1,196 @@
+/*
+  KINSHIP / 2126 — cinematic eco-futurist visual system
+  Original design. Scoped to the visual shell and opt-in class names.
+  No changes to routing, forms, evaluation, or API behavior.
+*/
+:root {
+  --kinship-deep: #0c3028;
+  --kinship-ink: #163d31;
+  --kinship-moss: #4a8165;
+  --kinship-muted: #667c70;
+  --kinship-acid: #d9eab9;
+  --kinship-canvas: #f0f3eb;
+}
+
+html { scroll-behavior: smooth; }
+.kinship-shell {
+  position: relative;
+  isolation: isolate;
+  background: #eff2e9;
+  color: var(--kinship-ink);
+  font-family: "Inter", "Avenir Next", ui-sans-serif, system-ui, sans-serif;
+}
+.kinship-atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 88% 8%, rgba(189, 218, 180, .25), transparent 40%),
+    radial-gradient(ellipse at 13% 82%, rgba(221, 230, 190, .25), transparent 40%),
+    linear-gradient(140deg, #f4f5ec 0%, #ecf2e8 100%);
+}
+.kinship-atmosphere::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: .16;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.17'/%3E%3C/svg%3E");
+}
+.kinship-app-column { min-height: 100vh; }
+.kinship-main { position: relative; }
+.kinship-main-inner { max-width: 1260px; }
+.kinship-footer { color: #7c9284; }
+
+/* Navigation: a museum-like dark botanical rail */
+.kinship-sidebar {
+  color: #e5eedf;
+  background: linear-gradient(160deg, #153f35 0%, #102f28 57%, #09231f 100%);
+  box-shadow: 2px 0 30px rgba(10, 43, 35, .10);
+}
+.kinship-sidebar::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(circle at -30% 12%, rgba(167, 206, 153, .11), transparent 48%);
+}
+.kinship-mark { background: #d6ebbd; color: #143e34; }
+.kinship-mark-dot { position: absolute; top: 9px; right: 8px; width: 5px; height: 5px; border-radius: 50%; background: #75a77a; }
+.kinship-brand { font-size: 29px; line-height: 1; color: #f3f6e7; }
+.kinship-brand-dot { color: #d4ebae; }
+.kinship-sidebar-rule { height: 1px; background: linear-gradient(90deg, rgba(224,239,216,.32), rgba(224,239,216,.04)); }
+.kinship-nav-link { color: #b1c9b9; border: 1px solid transparent; position: relative; }
+.kinship-nav-link:hover { color: #eff7e8; background: rgba(232, 246, 222, .075); }
+.kinship-nav-link.kinship-nav-active { background: rgba(217, 237, 199, .13); border-color: rgba(217, 237, 199, .15); color: #f7ffed; }
+.kinship-nav-number { color: #779e85; width: 17px; }
+.kinship-nav-active .kinship-nav-number { color: #d7eab6; }
+.kinship-nav-current { width: 5px; height: 5px; border-radius: 50%; background: #ddf2b7; box-shadow: 0 0 12px #ddf2b7; }
+.kinship-sidebar-note { border: 1px solid rgba(217, 237, 199, .19); background: linear-gradient(145deg, rgba(145,184,139,.16), rgba(199,231,171,.04)); }
+.kinship-sidebar-note-orbit { position: absolute; width: 185px; height: 185px; border: 1px solid rgba(221,243,192,.18); border-radius: 50%; right: -73px; top: -65px; }
+.kinship-sidebar-note-orbit::after { content:""; position:absolute; inset:25px; border-radius:50%; border:1px solid rgba(221,243,192,.1); }
+
+.kinship-navbar {
+  background: rgba(245,247,239,.74);
+  border-bottom: 1px solid rgba(102, 135, 115, .19);
+  backdrop-filter: blur(14px);
+}
+.kinship-eyebrow { color: #678b74; }
+.kinship-signal { color: #4e735c; background: rgba(210, 226, 205, .48); }
+.kinship-signal svg { color: #4d9c71; }
+.kinship-new-case { background: #133d32; color: #eff9e9; transition: background .25s, transform .25s; }
+.kinship-new-case:hover { background: #2e7355; transform: translateY(-1px); }
+.kinship-menu-button { color: #173f35; background: rgba(207,227,200,.5); }
+
+/* Editorial hero: atmospheric visual with an original illustrated city */
+.kinship-hero {
+  background: #0e332b;
+  box-shadow: 0 35px 75px -38px rgba(17,57,41,.42), 0 8px 30px rgba(22,59,43,.08);
+}
+.kinship-hero::after { content:""; position:absolute; inset:0; pointer-events:none; border:1px solid rgba(221,239,203,.22); border-radius:inherit; }
+.kinship-scene-svg { min-width: 900px; object-fit: cover; opacity: .98; }
+.kinship-scene { opacity: .95; }
+.kinship-hero-vignette {
+  background: linear-gradient(90deg, rgba(6,30,26,.98) 0%, rgba(7,32,27,.97) 19%, rgba(9,36,30,.81) 39%, rgba(8,34,29,.10) 75%),
+    linear-gradient(0deg, rgba(6,28,24,.62) 0%, transparent 25%, rgba(6,28,24,.15) 100%);
+}
+.kinship-hero-content { isolation: isolate; }
+.kinship-hero-chip { border: 1px solid rgba(217,234,188,.28); background: rgba(224,241,208,.09); color:#e5f3d8; backdrop-filter: blur(8px); }
+.kinship-spark { width:7px; height:7px; border-radius:50%; background:#d9edb2; box-shadow:0 0 18px rgba(223,252,170,.75); }
+.kinship-hero-copy { transform: translateZ(0); }
+.kinship-display-title {
+  font-family: "Arial Narrow", "Avenir Next Condensed", "Inter", ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(4rem, 7.1vw, 7.5rem);
+  line-height: .91;
+  font-weight: 650;
+  letter-spacing: -.085em;
+  text-wrap: balance;
+}
+.kinship-display-title em { font-family: Georgia, "Iowan Old Style", serif; color:#d4e6af; font-weight: 400; letter-spacing: -.065em; }
+.kinship-title-underline { position:relative; display:inline-block; padding-right:.12em; }
+.kinship-title-underline::after { content: ""; position:absolute; left:.03em; right:.01em; bottom:-.08em; height: 3px; background:#b3cf9c; transform:rotate(-1deg); border-radius:100%; }
+.kinship-hero-cta { background: #e3efc5; color: #163a30; box-shadow:0 12px 28px rgba(0,0,0,.16); transition: transform .28s, background .28s, box-shadow .28s; }
+.kinship-hero-cta:hover { background:#f0f6dc; transform:translateY(-3px); box-shadow:0 16px 31px rgba(0,0,0,.24); }
+.kinship-hero-secondary { color:#e0ecca; transition:color .2s; }
+.kinship-hero-secondary:hover { color:#fff; }
+.kinship-hero-bottom { color:#d1e1cd; }
+.kinship-hero-avatar { display:grid; place-items:center; height:34px; width:34px; border:2px solid #1c483c; border-radius:50%; background:#c2d6bb; font-size:17px; }
+.kinship-scene-coordinate { position:absolute; padding:8px 11px; border:1px solid rgba(231,246,217,.21); background:rgba(11,49,37,.35); backdrop-filter:blur(10px); color:rgba(240,250,222,.76); font-size:9px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; white-space:nowrap; }
+.kinship-scene-coordinate-point { display:inline-block; width:5px; height:5px; margin-right:8px; background:#e8f5be; border-radius:50%; box-shadow:0 0 9px #d4efac; }
+.kinship-scene-coordinate-one { top:21%; right:7%; }
+.kinship-scene-coordinate-two { bottom:29%; right:21%; }
+.kinship-scene-bottom-label { position:absolute; bottom:13%; right:6%; display:flex; gap:15px; color:#e2ebd7; font-size:9px; letter-spacing:.17em; opacity:.6; text-transform:uppercase; }
+.kinship-bird-one { animation: kinship-bird-flight 7s ease-in-out infinite; }
+.kinship-bird-two { animation: kinship-bird-flight 10s ease-in-out infinite reverse; }
+.kinship-pollen { animation: kinship-pollen-float 4s ease-in-out infinite; }
+@keyframes kinship-bird-flight { 0%,100% { transform:translate(0,0); } 50% { transform:translate(30px,-11px); } }
+@keyframes kinship-pollen-float { 0%,100% { transform:translateY(0); opacity:.75; } 50% { transform:translateY(-25px); opacity:1; } }
+
+/* Narrative sections */
+.kinship-editorial-heading {
+  font-family: "Arial Narrow", "Avenir Next Condensed", "Inter", ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(2.3rem, 4vw, 4.65rem);
+  font-weight: 610;
+  line-height: 1.06;
+  letter-spacing: -.067em;
+}
+.kinship-editorial-heading em { color: #57886b; font-family: Georgia, "Iowan Old Style", serif; font-weight: 400; letter-spacing: -.052em; }
+.kinship-section-kicker { color:#6d957a; }
+.kinship-text-link { color:#2b5c47; border-bottom:1px solid #9bb9a7; padding-bottom:7px; }
+.kinship-text-link:hover { color:#568c66; }
+.kinship-journey-card { transition:transform .35s ease, box-shadow .35s ease; }
+.kinship-journey-card:hover { transform:translateY(-6px); box-shadow:0 18px 35px -28px #224a35; }
+.kinship-journey-card-1 { background:#dde8d5; color:#204e3f; }
+.kinship-journey-card-2 { background:#dfdfce; color:#314d3f; }
+.kinship-journey-card-3 { background:#214b3d; color:#f2f4e7; }
+.kinship-card-number { font-family: Georgia, serif; font-style:italic; opacity:.38; }
+.kinship-card-icon { border:1px solid currentColor; opacity:.8; }
+.kinship-neighbor-note { background:#173e32; }
+.kinship-note-glow { position:absolute; right:6%; top:-170px; width:430px; height:430px; border:1px solid rgba(214,235,181,.15); border-radius:50%; box-shadow:0 0 0 65px rgba(215,242,175,.035),0 0 0 130px rgba(215,242,175,.025); }
+.kinship-note-link { background:#d9eab9; color:#173c30; transition:transform .3s; }
+.kinship-note-link:hover { transform:translateY(-3px); }
+
+/* A calmer but more tactile visual treatment for ALL existing functional pages. */
+.kinship-main-inner > .page-enter > div > section:first-child { position:relative; }
+.kinship-main-inner h1 { letter-spacing:-.055em; }
+.kinship-main-inner h2 { letter-spacing:-.035em; }
+.kinship-card { border-color:rgba(85,124,95,.15); background:rgba(255,255,250,.88); box-shadow:0 14px 40px -35px rgba(15,56,36,.42),0 1px 0 rgba(255,255,255,.85) inset; }
+.kinship-main-inner .kinship-card { border-radius:24px; }
+.kinship-button { min-height:43px; transition:transform .24s, box-shadow .24s, background-color .24s; }
+.kinship-button:not(:disabled):hover { transform:translateY(-2px); box-shadow:0 12px 24px -14px rgba(23,69,47,.42); }
+.kinship-main input:not([type="range"]):not([type="checkbox"]),
+.kinship-main textarea,
+.kinship-main select { transition:border-color .2s, box-shadow .2s; }
+.kinship-main input:not([type="range"]):not([type="checkbox"]):focus-visible,
+.kinship-main textarea:focus-visible,
+.kinship-main select:focus-visible { box-shadow:0 0 0 4px rgba(77,136,105,.12); }
+.kinship-main-inner .leaflet-container { border-radius:18px; }
+.kinship-main-inner .bg-forest { background-color:#173f35; }
+.kinship-main-inner .bg-cream { background-color:#f3f6ec; }
+.kinship-main-inner .bg-sage\/40 { background-color:rgba(185,205,184,.38); }
+.kinship-main-inner .bg-peach\/40 { background-color:rgba(245,214,189,.44); }
+
+:where(.kinship-shell) :is(a,button,input,textarea,select):focus-visible { outline:3px solid #96bb81; outline-offset:3px; }
+
+@media (max-width:1200px) {
+  .kinship-display-title { font-size:clamp(3.75rem, 7.5vw, 6.6rem); }
+  .kinship-scene-svg { transform:translateX(80px); }
+}
+@media (max-width:850px) {
+  .kinship-hero-vignette { background:linear-gradient(90deg,rgba(6,30,26,.96) 0%,rgba(6,30,26,.84) 50%,rgba(6,30,26,.28) 100%),linear-gradient(0deg,rgba(5,25,20,.6),transparent 32%); }
+  .kinship-scene-svg { transform:translateX(180px); }
+  .kinship-scene-coordinate { display:none; }
+  .kinship-display-title { font-size:clamp(3.9rem, 9.5vw, 6rem); }
+}
+@media (max-width:580px) {
+  .kinship-main { padding-top:16px; }
+  .kinship-display-title { font-size:clamp(3.35rem, 14.5vw, 5.4rem); line-height:.95; }
+  .kinship-hero-copy { padding-top:75px; padding-bottom:70px; }
+  .kinship-hero-vignette { background:linear-gradient(90deg,rgba(6,30,26,.95),rgba(6,30,26,.62)),linear-gradient(0deg,rgba(5,25,20,.6),transparent 32%); }
+  .kinship-scene-svg { transform:translateX(260px); opacity:.64; }
+  .kinship-hero-content { padding-left:24px; padding-right:24px; }
+  .kinship-hero-bottom { gap:12px; }
+  .kinship-editorial-heading { font-size:clamp(2.15rem, 9vw, 3rem); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior:auto; }
+  .kinship-bird, .kinship-pollen { animation:none !important; }
+  .kinship-journey-card, .kinship-button, .kinship-new-case, .kinship-hero-cta { transition:none !important; }
+  .kinship-journey-card:hover, .kinship-button:hover, .kinship-new-case:hover, .kinship-hero-cta:hover { transform:none !important; }
+}

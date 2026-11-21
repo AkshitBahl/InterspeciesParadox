@@ -1,42 +1,42 @@
-import { Menu, Leaf } from "lucide-react";
+import { ArrowUpRight, Menu, Radio } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 
 interface NavbarProps {
   onMenuClick: () => void;
 }
 
-export default function Navbar({
-  onMenuClick,
-}: NavbarProps) {
+const pageNames: Record<string, string> = {
+  "/": "The living city",
+  "/profile": "Human representative",
+  "/conflict/new": "New coexistence case",
+};
+
+export default function Navbar({ onMenuClick }: NavbarProps) {
+  const { pathname } = useLocation();
+  const section = pathname.split("/")[3];
+  const pageTitle = pageNames[pathname] ?? ({ assessment: "Needs assessment", mediation: "Mediation studio", agreement: "Agreement review" } as Record<string, string>)[section] ?? "Coexistence studio";
+
   return (
-    <header className="flex h-20 items-center justify-between border-b border-forest/10 bg-cream px-5 sm:px-8 lg:px-10">
-      <div className="flex items-center gap-4">
-        <button
-          onClick={onMenuClick}
-          aria-label="Open navigation"
-          className="rounded-lg p-2 text-forest hover:bg-sage/30 lg:hidden"
-        >
-          <Menu size={24} />
+    <header className="kinship-navbar relative z-20 flex min-h-[80px] items-center justify-between gap-3 px-4 sm:px-7 lg:px-9 xl:px-12">
+      <div className="flex min-w-0 items-center gap-4">
+        <button type="button" onClick={onMenuClick} aria-label="Open navigation" aria-controls="primary-navigation" className="kinship-menu-button rounded-xl p-2 lg:hidden">
+          <Menu size={23} />
         </button>
-
-        <div>
-          <p className="text-sm font-semibold text-forest">
-            Welcome to the neighborhood
-          </p>
-
-          <p className="text-xs text-ink/50">
-            A new era of urban coexistence
-          </p>
+        <div className="hidden h-[28px] w-px bg-[#bbcbc0] sm:block" aria-hidden="true" />
+        <div className="min-w-0">
+          <p className="kinship-eyebrow text-[9px] font-semibold uppercase tracking-[0.23em]">Your neighborhood / 2126</p>
+          <p className="truncate text-[13px] font-medium tracking-[-0.02em] text-[#24483c]">{pageTitle}</p>
         </div>
       </div>
-
-      <div className="flex items-center gap-3">
-        <span className="hidden rounded-full bg-sage/40 px-4 py-2 text-xs font-semibold text-forest sm:block">
-          🌿 Year 2126
-        </span>
-
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-forest text-cream">
-          <Leaf size={19} />
+      <div className="flex items-center gap-2 sm:gap-4">
+        <div className="kinship-signal hidden items-center gap-2 rounded-full px-3 py-2 sm:flex">
+          <Radio size={14} strokeWidth={1.7} aria-hidden="true" />
+          <span className="text-[10px] font-semibold uppercase tracking-[0.12em]">Coexistence network</span>
         </div>
+        <Link to="/conflict/new" className="kinship-new-case inline-flex items-center gap-2 rounded-full px-3 py-2.5 text-[11px] font-semibold sm:px-4" aria-label="Report a new conflict">
+          <span className="hidden sm:inline">New case</span><span className="sm:hidden">Report</span>
+          <ArrowUpRight size={15} strokeWidth={1.8} aria-hidden="true" />
+        </Link>
       </div>
     </header>
   );
