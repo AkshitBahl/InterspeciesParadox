@@ -3,7 +3,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from app.schemas.common import Geometry
+from app.schemas.common import Geometry, Statement
 
 
 class FeatureCreate(BaseModel):
@@ -169,6 +169,41 @@ class RouteResponse(BaseModel):
     provider_used: str
     active_buffers_considered: int
     date: str
+    notes: list[str]
+
+
+class RouteNegotiationRequest(BaseModel):
+    start: Coordinate
+    end: Coordinate
+    waypoints: list[Coordinate] = Field(default_factory=list, max_length=10)
+    profile: Literal["foot", "bike", "car"] = "foot"
+    provider: Literal["auto", "osrm", "local"] = Field(
+        "auto", description="Use 'local' to stay on the demo district's own streets (OSRM uses real Brussels streets)"
+    )
+    max_extra_minutes: float = Field(5, ge=0, le=60, description="The longest detour you accept to leave the animals in peace")
+    nearby_m: float = Field(40, ge=5, le=200, description="How far from the route to look for wildlife")
+
+
+class RouteNegotiationStep(BaseModel):
+    step: int
+    actor: str
+    kind: Literal["initial_route", "wildlife_on_route", "objection", "reply", "agreement"]
+    text: str
+
+
+class RouteNegotiationResponse(BaseModel):
+    date: str
+    outcome: Literal["no_conflict", "rerouted", "conditions"]
+    provider_used: str
+    initial_route: RouteOption
+    negotiated_route: RouteOption
+    detour_offered: RouteOption | None = Field(None, description="A gentler detour that was longer than max_extra_minutes")
+    wildlife_on_route: list[dict[str, Any]]
+    statements: list[Statement]
+    conditions: list[str]
+    comparison: dict[str, Any]
+    steps: list[RouteNegotiationStep]
+    geojson: dict[str, Any] = Field(description="Routes, crossed quiet zones and animals, each with properties.role, ready for MapLibre")
     notes: list[str]
 
 

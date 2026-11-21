@@ -3,8 +3,8 @@
 from fastapi import APIRouter, HTTPException, Query
 
 from app.api.deps import DbSession
-from app.schemas.map import RouteRequest, RouteResponse, SearchResponse
-from app.services import routing, search
+from app.schemas.map import RouteNegotiationRequest, RouteNegotiationResponse, RouteRequest, RouteResponse, SearchResponse
+from app.services import route_negotiation, routing, search
 from app.services.external import ExternalServiceError
 
 router = APIRouter(prefix="/geo", tags=["search & routing"])
@@ -43,6 +43,34 @@ def plan_route(body: RouteRequest, db: DbSession):
             alternatives=body.alternatives,
             avoid_active_buffers=body.avoid_active_buffers,
             provider=body.provider,
+        )
+    except ExternalServiceError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@router.post("/route/negotiate", response_model=RouteNegotiationResponse)
+def negotiate_route(body: RouteNegotiationRequest, db: DbSession):
+    """Give a start and an end: get the fastest route with every animal along it, then watch
+    the species representatives negotiate it.
+
+    `outcome`:
+    * `no_conflict`: nobody is disturbed, take the fastest route.
+    * `rerouted`: a detour of at most `max_extra_minutes` leaves the animals in peace.
+    * `conditions`: no acceptable detour, so you keep the fast route with conditions
+      (keep quiet, no lights, dogs on a lead...).
+
+    `steps` tells the story for the UI; `geojson` draws it (filter on `properties.role`).
+    """
+    try:
+        return route_negotiation.negotiate_route(
+            db,
+            start=body.start.pair(),
+            end=body.end.pair(),
+            waypoints=[w.pair() for w in body.waypoints],
+            profile=body.profile,
+            provider=body.provider,
+            max_extra_minutes=body.max_extra_minutes,
+            nearby_m=body.nearby_m,
         )
     except ExternalServiceError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc

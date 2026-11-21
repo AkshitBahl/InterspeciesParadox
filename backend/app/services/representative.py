@@ -57,6 +57,11 @@ DEFAULT_PHRASEBOOK: dict[str, list[str]] = {
     "sign": ["Signed with a {signature}. See you at the first review on {review}."],
     "refuse_sign": ["I won't sign a plan that leaves us at {score} out of 100."],
     "comment": ["Noted! {catchphrase}"],
+    # Route negotiation (someone wants to walk, ride or drive past the home).
+    "route.objection": ["Hold on! Your route runs {inside_m} m through the quiet zone around my {site}, and in {months} we need calm."],
+    "route.thanks": ["The detour is only {extra_m} m longer, {extra_min}. Take it and we're good neighbours. {catchphrase}"],
+    "route.too_long": ["I know the detour is {extra_m} m longer. Fine, use the short way, but please {conditions}."],
+    "route.conditions": ["There's no way around my {site}, so pass by, but please {conditions}."],
 }
 
 SIGNATURES = {"bird": "feather", "mammal": "paw print", "insect": "tiny pollen smudge"}

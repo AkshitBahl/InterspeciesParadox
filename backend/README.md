@@ -165,7 +165,8 @@ Useful map endpoints:
 | `GET /map/animations` | Moving things (wildlife on corridors, residents on journeys, delivery bikes and robots) with `coordinates`, `duration_ms` and keyframes. Animate with `turf.along()`. |
 | `POST /map/export/markdown` | Turn a drawn area (bbox, polygon or conflict) into a Markdown brief + JSON summary for an LLM. Add `question` to append a task. |
 | `GET /geo/search?q=moss` | Dataset places first, then OpenStreetMap (Nominatim). |
-| `POST /geo/route` | Route preview with alternatives, steps, time and a **wildlife disturbance score**. If every route crosses an active quiet zone, a wildlife-friendly detour is added. |
+| `POST /geo/route` | Route preview with alternatives, steps, time and a **wildlife disturbance score**. If every route crosses an active quiet zone, a wildlife-friendly detour is added. `wildlife.nearby` lists every animal along each route. |
+| `POST /geo/route/negotiate` | **Route negotiation.** Give a start and an end: you get the fastest route, every animal along it, each disturbed species' objection, and the agreed result: a detour (`rerouted`), conditions such as "keep dogs on a lead" (`conditions`), or nothing to change (`no_conflict`). `steps` tells the story; `geojson` draws it (`properties.role`). |
 
 Markers: every feature has `properties.emoji` (🐦 🦇 🐝 🦔 🦊 🏠 🚲 ...) for HTML markers or labels.
 
@@ -176,6 +177,10 @@ Markers: every feature has `properties.emoji` (🐦 🦇 🐝 🦔 🦊 🏠 �
 * Search and reverse geocoding use **Nominatim**, with a real User-Agent, max 1 request per second and a 1 hour cache
   (their usage policy).
 * Quiet zones are measured at street level: a falcon nest 78 m up a tower is not disturbed by people walking below.
+* For the demo district, send `"provider": "local"`: OSRM follows the real Brussels streets, not the fictional 2126 paths.
+* Try route negotiation out of the box from Pondside Terraces `[4.3722935, 50.8230956]` to Mosshaus `[4.3745688, 50.8247235]`
+  (no way around the fox den, so you get conditions). Drop a fox on Avenue du Soleil with `POST /map/features` and route along
+  the avenue to see a detour.
 * Set `ENABLE_EXTERNAL_GEO=false` to stay fully offline.
 
 ---
@@ -199,12 +204,12 @@ backend/
 │   │   ├── agreement_service.py    step 8
 │   │   ├── representative.py       the voices of the animals (template based, grounded)
 │   │   ├── map_service.py          GeoJSON + current/proposed scenarios
-│   │   ├── routing.py, path_network.py, search.py, external.py
+│   │   ├── routing.py, route_negotiation.py, path_network.py, search.py, external.py
 │   │   ├── animations.py, markdown_export.py
 │   │   └── geo.py, seasons.py, context.py
 │   └── seed/                   species data, the Brussels dataset, the demo story
 ├── alembic/                    database migrations
-└── tests/                      pytest (73 tests)
+└── tests/                      pytest (79 tests)
 ```
 
 ### Design choices (and why)

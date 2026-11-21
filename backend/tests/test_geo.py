@@ -147,3 +147,78 @@ def test_external_answers_are_cached(client, fake_osm):
     client.get(f"{API}/geo/search", params={"q": "flagey"})
     client.get(f"{API}/geo/search", params={"q": "flagey"})
     assert sum(1 for c in fake_osm if c.url.path.endswith("/search")) == 1
+
+
+# --- Route negotiation ------------------------------------------------------------
+
+PONDSIDE, MOSSHAUS = [4.3722935, 50.8230956], [4.3745688, 50.8247235]
+SCHOOL_RUN = {"start": {"lon": PONDSIDE[0], "lat": PONDSIDE[1]}, "end": {"lon": MOSSHAUS[0], "lat": MOSSHAUS[1]}, "provider": "local"}
+
+
+def test_route_lists_the_wildlife_along_the_way(client):
+    route = client.post(f"{API}/geo/route", json=SCHOOL_RUN).json()["routes"][0]
+    nearby = {n["name"]: n for n in route["wildlife"]["nearby"]}
+    martins = nearby["House martin colony above Mosshaus entrance"]
+    assert martins["disturbed_by_route"] is False and "out of reach" in martins["note"]
+    fox = nearby["Fox den under the garden shed"]
+    assert fox["disturbed_by_route"] is True and fox["sensitive_now"] is True
+    assert any(n["layer"] == "wildlife_corridor" and n["species_slug"] == "european-hedgehog" for n in nearby.values())
+    distances = [n["distance_m"] for n in route["wildlife"]["nearby"]]
+    assert distances == sorted(distances)
+
+
+def _negotiate(client, body):
+    r = client.post(f"{API}/geo/route/negotiate", json=body)
+    assert r.status_code == 200, r.text
+    return r.json()
+
+
+def test_negotiation_without_conflict(client):
+    d = _negotiate(client, {**ROUTE, "provider": "local"})
+    assert d["outcome"] == "no_conflict"
+    assert d["negotiated_route"]["id"] == d["initial_route"]["id"]
+    assert d["statements"] == [] and d["conditions"] == []
+    assert d["steps"][-1]["kind"] == "agreement"
+
+
+def test_negotiation_reroutes_around_the_fox(client, fox_on_the_avenue):
+    d = _negotiate(client, {**ROUTE, "provider": "local"})
+    assert d["outcome"] == "rerouted"
+    assert d["initial_route"]["id"] == "local-shortest"
+    assert d["negotiated_route"]["id"] == "local-wildlife"
+    assert d["comparison"]["disturbance_before"] > 0 and d["comparison"]["disturbance_after"] == 0
+    assert d["comparison"]["extra_distance_m"] == pytest.approx(200, abs=2)
+    assert d["wildlife_on_route"][0]["name"] == "Fox resting under a bench"
+
+    [fox] = d["statements"]
+    assert fox["speaker"] == "Vix Rousseau"
+    assert {g["source"] for g in fox["grounding"]} >= {"species.preferred_buffer_m", "species.sensitive_months"}
+    assert [s["kind"] for s in d["steps"]] == ["initial_route", "wildlife_on_route", "objection", "reply", "agreement"]
+    roles = {f["properties"]["role"] for f in d["geojson"]["features"]}
+    assert roles == {"initial_route", "negotiated_route", "crossed_zone", "wildlife_on_route"}
+
+
+def test_negotiation_sets_conditions_when_the_detour_is_too_long(client, fox_on_the_avenue):
+    d = _negotiate(client, {**ROUTE, "provider": "local", "max_extra_minutes": 1})
+    assert d["outcome"] == "conditions"
+    assert d["negotiated_route"]["id"] == "local-shortest"
+    assert d["detour_offered"]["id"] == "local-wildlife"
+    assert "keep dogs on a lead" in d["conditions"]  # foxes move on the ground
+    sources = {g["source"] for g in d["statements"][0]["grounding"]}
+    assert {"species.movement_mode", "species.min_buffer_m"} <= sources
+
+
+def test_negotiation_sets_conditions_when_there_is_no_way_around(client):
+    """The only path out of Pondside Terraces passes the fox den."""
+    d = _negotiate(client, {**SCHOOL_RUN, "profile": "bike"})
+    assert d["outcome"] == "conditions"
+    assert d["detour_offered"] is None
+    assert "slow down to walking pace" in d["conditions"]
+    assert "no way around" in d["steps"][-1]["text"]
+
+
+def test_negotiation_with_osrm(client, fox_on_the_avenue, fake_osm):
+    d = _negotiate(client, ROUTE)
+    assert d["provider_used"] == "osrm"
+    assert d["initial_route"]["id"] == "osrm-0"
+    assert d["outcome"] == "rerouted" and d["negotiated_route"]["id"] == "local-wildlife"

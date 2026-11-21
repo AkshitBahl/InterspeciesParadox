@@ -74,6 +74,9 @@ def seed_species(db: Session) -> dict[str, Species]:
     existing = {s.slug: s for s in db.scalars(select(Species))}
     for data in SPECIES:
         if data["slug"] in existing:
+            rep = existing[data["slug"]].representative
+            if rep is not None and rep.phrasebook != data["representative"].get("phrasebook"):
+                rep.phrasebook = data["representative"].get("phrasebook") or {}  # keep voices up to date
             continue
         rep_data = data["representative"]
         species = Species(**{k: v for k, v in data.items() if k in SPECIES_COLUMNS}, data_note=DATA_NOTE)

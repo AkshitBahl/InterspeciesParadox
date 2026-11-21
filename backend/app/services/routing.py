@@ -9,6 +9,8 @@
 4. If every route disturbs wildlife, add an offline "wildlife-friendly" route
    that goes around the buffers.
 5. Recommend the least disturbing route (then the fastest).
+6. For every route, list the wildlife along it (`wildlife.nearby`): homes, animals
+   and ground corridors within `nearby_m`, even the ones it cannot disturb.
 """
 
 import math
@@ -29,6 +31,7 @@ from app.services.map_service import (
 from app.services.path_network import PathNetwork
 
 SPEEDS_M_S = {"foot": 1.35, "bike": 4.2, "car": 8.0}
+NEARBY_M = 40.0
 
 Zone = tuple[MapFeature, dict[str, Any]]  # (buffer feature, its footprint at street level)
 
@@ -153,6 +156,63 @@ def _annotate(route: dict[str, Any], zones: list[Zone], species: dict) -> None:
     }
 
 
+def nearby_wildlife(
+    route_geometry: dict[str, Any], features: list[MapFeature], zones: list[Zone], species: dict, day: date, within_m: float = NEARBY_M,
+) -> list[dict[str, Any]]:
+    """Every wildlife home, animal and ground corridor within `within_m` of a route, closest first.
+
+    Each entry says whether the route can disturb it, and why not when it can't
+    (out of season, too high up, outside its quiet zone).
+    """
+    proj = geo.projection_near(route_geometry)
+    line = proj.geom_to_xy(route_geometry)
+    crossed = {b.parent_id: geo.length_inside(route_geometry, g, proj) for b, g in zones if b.parent_id}
+    crossed_ids = {k for k, v in crossed.items() if v > 0.5}
+    out = []
+    for f in features:
+        if f.layer not in ("wildlife_site", "wildlife", "wildlife_corridor"):
+            continue
+        sp = species.get(f.species_id)
+        if f.layer == "wildlife_corridor" and (sp is None or sp.movement_mode != "ground"):
+            continue  # birds, bats and bees fly over the street
+        distance = float(line.distance(proj.geom_to_xy(f.geometry)))
+        if distance > within_m:
+            continue
+        sensitive = bool(sp and day.month in (sp.sensitive_months or []))
+        height = float((f.properties or {}).get("height_m") or 0)
+        disturbs = f.id in crossed_ids
+        if f.layer == "wildlife_corridor":
+            note = f"The route crosses the {f.name.lower()}." if distance < 0.5 else "Runs alongside the route."
+        elif disturbs:
+            note = f"The route passes through its quiet zone ({crossed[f.id]:.0f} m inside)."
+        elif sp and height and height >= sp.preferred_buffer_m:
+            note = f"{height:g} m up: out of reach from the street."
+        elif f.layer == "wildlife_site" and not sensitive:
+            note = "Not in its sensitive season this month."
+        elif f.layer == "wildlife_site":
+            note = "Close, but outside its quiet zone."
+        elif sp and sp.movement_mode in ("aerial", "flying_insect"):
+            note = "Usually in the air above you."
+        else:
+            note = "Seen around here."
+        out.append({
+            "feature_id": str(f.id),
+            "name": f.name,
+            "layer": f.layer,
+            "species": sp.common_name if sp else None,
+            "species_slug": sp.slug if sp else None,
+            "emoji": (f.properties or {}).get("emoji") or (sp.emoji if sp else "🐾"),
+            "representative": sp.representative.name if sp and sp.representative else None,
+            "distance_m": round(distance, 1),
+            "height_m": height or None,
+            "sensitive_now": sensitive,
+            "disturbed_by_route": disturbs,
+            "note": note,
+            "geometry": f.geometry,
+        })
+    return sorted(out, key=lambda x: (x["distance_m"], x["name"]))
+
+
 def _same(a: dict[str, Any], b: dict[str, Any]) -> bool:
     return abs(a["distance_m"] - b["distance_m"]) < 1.0 and a["geometry"]["coordinates"][len(a["geometry"]["coordinates"]) // 2] == b["geometry"]["coordinates"][len(b["geometry"]["coordinates"]) // 2]
 
@@ -168,6 +228,7 @@ def plan_routes(
     avoid_active_buffers: bool = True,
     provider: str = "auto",
     day: date | None = None,
+    nearby_m: float = NEARBY_M,
 ) -> dict[str, Any]:
     day = day or clock.today()
     waypoints = waypoints or []
@@ -214,6 +275,8 @@ def plan_routes(
     for r in options:
         if not any(_same(r, d) for d in deduped):
             deduped.append(r)
+    for r in deduped:
+        r["wildlife"]["nearby"] = nearby_wildlife(r["geometry"], features, zones, species, day, nearby_m)
     key = (lambda r: (r["wildlife"]["disturbance_score"], r["duration_s"])) if avoid_active_buffers else (lambda r: (r["duration_s"],))
     recommended = min(deduped, key=key)["id"] if deduped else None
     return {
