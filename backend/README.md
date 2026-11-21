@@ -1,0 +1,217 @@
+# The Interspecies Paradox: backend
+
+*Nature Is My Neighbor Now* · Solarpunk 2126
+
+This is the API for an **interspecies mediation platform**. When people and urban
+wildlife want the same space (a door, a roof, a balcony, a street at night), the
+platform helps them find a fair compromise. Every species has a funny digital
+representative (Martina Mudd the house martin, Count Pipistrello the bat...), but
+everything they say comes from structured ecological data.
+
+Stack: Python 3.12+, FastAPI, PostgreSQL, SQLAlchemy 2.0, Alembic, Pydantic v2,
+JWT auth, Argon2 password hashing, pytest.
+
+---
+
+## 1. How it works, step by step
+
+Think of it like a mediator sitting between a neighbour and an animal.
+
+| Step | What happens | Main endpoint |
+|---|---|---|
+| 1. Profile | You say who you are: home, mobility needs (stroller, wheelchair), allergies, budget, what matters to you. | `PUT /api/v1/profiles/me` |
+| 2. Report | You report a problem ("bats in the roof I want to renovate"). A hotspot appears on the map. If no known nest is within 60 m, a new one is added with its seasonal quiet zone. | `POST /api/v1/conflicts` |
+| 3. Needs | The engine lists what **you** need (a usable door, a work window...) and what the **animal** needs (quiet nest, dark sky, safe passage...). | `POST /conflicts/{id}/assessment` |
+| 4. Clashes and common ground | It pairs the needs: which ones clash (door vs nest) and which fit together (you love nature + they eat mosquitoes). | same response |
+| 5. Compromises | It tries 7 generic strategies (quiet zone, screen, reschedule, new home nearby, dark corridor, safe passage, watch and adapt) and keeps the ones that beat "doing nothing". | `POST /conflicts/{id}/solutions/generate` |
+| 6. Compare | Each idea gets a **Coexistence Index** from 0 to 100, with every number shown. | `GET /conflicts/{id}/solutions/compare` |
+| 7. Negotiate | You change a knob ("only 2 m please"). The representative answers: accept, accept with concerns, counter-offer, or reject, and explains why with data. | `POST /conflicts/{id}/negotiation/counter-proposals` |
+| 8. Agreement | A **temporary** agreement is drafted (valid until the season ends, with review dates). The representative signs with a feather or a paw print; when you sign, it becomes active and appears on the map. | `POST /agreements/{id}/sign` |
+
+### The Coexistence Index (step 6)
+
+```
+Wildlife wellbeing = how well each wildlife need is met (weighted by importance)
+Human wellbeing    = the same for human needs
+Feasibility        = 40% cost vs budget + 30% time + 30% effort
+Balance            = 100 - |Wildlife - Human|   (punishes one-sided "wins")
+
+Index = 0.30 x Wildlife + 0.30 x Human + 0.20 x Feasibility + 0.20 x Balance
+```
+
+Three safety gates can cap the score, whatever the maths says:
+
+* breaks a legal protection rule (e.g. bats are protected by EU law) → max **39**
+* goes below an ecological minimum (e.g. too close to a den) → max **49**
+* breaks a hard human need (e.g. no step-free entrance for a wheelchair) → max **49**
+
+Grades: 80+ *Thriving together* 🌿, 65+ *Good neighbours* 🤝, 50+ *Fragile truce* ⚖️, below *Conflict persists* ⚠️.
+You can try your own weights: `GET /solutions/{id}/coexistence-index?wildlife=2&human=1`.
+
+---
+
+## 2. Run it
+
+### Option A: Docker (easiest)
+
+```bash
+cd backend
+docker compose up --build
+```
+
+Open http://localhost:8000/docs. The database is created, migrated and filled with the demo story automatically.
+
+### Option B: on your machine
+
+You need Python 3.12+ and PostgreSQL.
+
+```bash
+cd backend
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements-dev.txt
+cp .env.example .env                 # then edit DATABASE_URL if needed
+
+createdb interspecies                # or create it in pgAdmin
+alembic upgrade head                 # creates the tables
+python -m app.seed                   # loads species, the Brussels map and the demo story
+uvicorn app.main:app --reload        # http://localhost:8000/docs
+```
+
+`python -m app.seed --reset` wipes everything and starts the demo again.
+
+### Run the tests
+
+```bash
+pytest                               # fast: uses an in-memory SQLite database
+TEST_DATABASE_URL=postgresql+psycopg://paradox:paradox@localhost:5432/interspecies_test pytest   # real PostgreSQL
+ruff check .
+```
+
+OSRM and Nominatim are faked in the tests, so they run without internet.
+
+---
+
+## 3. The demo world
+
+**Date:** the story happens on **20 May 2126** (spring: nests are full). Seasons drive everything,
+so you can change the date with `SIMULATED_TODAY=2126-12-01` (or `real` for today's date).
+
+**Place:** "Ixelles Ponds Eco-District", a fictional 2126 neighbourhood near Flagey, Brussels:
+6 buildings (Mosshaus, Solaris Tower, Old Brewery, Canopy Court, Pondside Terraces, Flagey Commons Hub),
+streets, daily journeys, delivery routes, habitats, corridors and 6 wildlife homes.
+
+**Logins** (password for everyone: `coexist2126`):
+
+| Email | Who | Their story |
+|---|---|---|
+| `lina@example.org` | Parent with a stroller in Mosshaus | House martins above her door. **Fully solved**: agreement active. |
+| `jonas@example.org` | Old Brewery owner | Bats in the roof he wants to renovate. **Negotiation open.** |
+| `mei@example.org` | Remote worker, allergic to stings | Mason bees in her balcony blind. Solutions ready. |
+| `rafael@example.org` | Solar technician | Peregrine chicks next to the solar panels. Solutions ready. |
+| `ops@example.org` | Delivery co-op | Night robots crossing the hedgehog highway. Solutions ready. |
+| `noor@example.org` | Pondside resident | Fox family near the playground. **Just reported**: try steps 3 to 8 yourself. |
+| `admin@example.org` | Mediator admin | Can edit everything. |
+
+The species representatives:
+
+| Species | Representative |
+|---|---|
+| House martin | Martina Mudd |
+| Peregrine falcon | Commander Stoop |
+| Common pipistrelle bat | Count Pipistrello |
+| Red mason bee | Osmia Stonewright |
+| European hedgehog | Professor Hogsworth Prickles |
+| Red fox | Vix Rousseau |
+
+Every statement they make comes with `grounding`: the list of data fields it is based on
+(buffer distances, sensitive months, legal status...). The jokes are fiction; the numbers are not.
+The ecology is simplified for a demo (see `data_note` on each species): check with a local ecologist before real use.
+
+---
+
+## 4. For the frontend (MapLibre)
+
+Everything is plain GeoJSON. One source holds all features; each has `properties.layer`.
+
+```js
+const API = "http://localhost:8000/api/v1";
+const cfg = await fetch(`${API}/map/config`).then((r) => r.json());
+
+const map = new maplibregl.Map({
+  container: "map",
+  style: cfg.basemap_style_url,          // OpenFreeMap, free, no key
+  center: cfg.center, zoom: cfg.zoom, pitch: cfg.pitch, bearing: cfg.bearing,
+});
+
+map.on("load", () => {
+  map.addSource("paradox", { type: "geojson", data: `${API}/map/features` });
+  cfg.maplibre_layers.forEach((layer) => map.addLayer(layer));   // ready-made styles, 3D buildings included
+});
+
+// "Current situation / Proposed solution" toggle
+const showProposed = (solutionId) => map.getSource("paradox").setData(`${API}/map/scenarios/${solutionId}`);
+const showCurrent = () => map.getSource("paradox").setData(`${API}/map/features`);
+```
+
+Useful map endpoints:
+
+| Endpoint | What for |
+|---|---|
+| `GET /map/config` | Centre, zoom, bounds, basemap, layer list with colours, MapLibre style layers. |
+| `GET /map/features?layers=building,wildlife_site&bbox=...&active_on=2126-06-01` | Filtered GeoJSON. Buffers have `active_now` (is the season on today?). |
+| `GET /map/scenarios/{solution_id}/compare` | Both scenarios at once: new features are `scenario_role: "proposed"`, removed ones `"replaced"`. |
+| `GET /map/locations` | Named dataset places where users can drop people or animals. |
+| `POST /map/features` | Add your own resident, animal, nest, path... (a nest gets its seasonal buffer automatically). Drag it with `PATCH`. |
+| `GET /map/animations` | Moving things (wildlife on corridors, residents on journeys, delivery bikes and robots) with `coordinates`, `duration_ms` and keyframes. Animate with `turf.along()`. |
+| `POST /map/export/markdown` | Turn a drawn area (bbox, polygon or conflict) into a Markdown brief + JSON summary for an LLM. Add `question` to append a task. |
+| `GET /geo/search?q=moss` | Dataset places first, then OpenStreetMap (Nominatim). |
+| `POST /geo/route` | Route preview with alternatives, steps, time and a **wildlife disturbance score**. If every route crosses an active quiet zone, a wildlife-friendly detour is added. |
+
+Markers: every feature has `properties.emoji` (🐦 🦇 🐝 🦔 🦊 🏠 🚲 ...) for HTML markers or labels.
+
+### Routing and search
+
+* Routing uses **OSRM** on real OpenStreetMap streets (`routing.openstreetmap.de`). If it is unreachable, the API
+  quietly uses its own offline path network of the demo district, so the demo always works.
+* Search and reverse geocoding use **Nominatim**, with a real User-Agent, max 1 request per second and a 1 hour cache
+  (their usage policy).
+* Quiet zones are measured at street level: a falcon nest 78 m up a tower is not disturbed by people walking below.
+* Set `ENABLE_EXTERNAL_GEO=false` to stay fully offline.
+
+---
+
+## 5. Code map
+
+```
+backend/
+├── app/
+│   ├── main.py                 FastAPI app, CORS, error handlers
+│   ├── core/                   settings, JWT + Argon2, simulated clock
+│   ├── db/                     SQLAlchemy base types and session
+│   ├── models/                 tables: users, species, map features, conflicts, solutions, negotiations, agreements
+│   ├── schemas/                Pydantic request and response models
+│   ├── api/v1/endpoints/       one file per area (auth, profiles, species, conflicts, solutions, negotiation, agreements, map, geo, dashboard)
+│   ├── services/               the brains
+│   │   ├── needs_engine.py         steps 3-4
+│   │   ├── strategies.py           step 5: the 7 compromise strategies
+│   │   ├── coexistence_index.py    step 6
+│   │   ├── negotiation_service.py  step 7
+│   │   ├── agreement_service.py    step 8
+│   │   ├── representative.py       the voices of the animals (template based, grounded)
+│   │   ├── map_service.py          GeoJSON + current/proposed scenarios
+│   │   ├── routing.py, path_network.py, search.py, external.py
+│   │   ├── animations.py, markdown_export.py
+│   │   └── geo.py, seasons.py, context.py
+│   └── seed/                   species data, the Brussels dataset, the demo story
+├── alembic/                    database migrations
+└── tests/                      pytest (73 tests)
+```
+
+### Design choices (and why)
+
+* **No PostGIS.** Geometry is stored as GeoJSON (JSONB in PostgreSQL) with bounding-box columns; maths is done
+  in Python with Shapely in metres. One less thing to install for a hackathon. PostGIS can be added later.
+* **No LLM needed.** The representatives use templates filled with data, so they never invent biology.
+  The Markdown export is there if you want to hand an area to an LLM.
+* **Temporary agreements.** Agreements end with the season and have review dates, because wildlife changes.
+* **Simulated clock.** The story is set in 2126 and seasons matter, so "today" is a setting.
