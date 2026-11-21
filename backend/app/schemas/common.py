@@ -30,15 +30,6 @@ class Grounding(BaseModel):
     value: Any = None
 
 
-class VoiceInfo(BaseModel):
-    """Who wrote the words: the templates, or the local LLM (re-wording the template, facts unchanged)."""
-
-    engine: str  # "template" | "llm"
-    model: str | None = None
-    reason: str | None = None  # why the template was used
-    template_text: str | None = None  # what the template said, when the LLM re-worded it
-
-
 class Statement(BaseModel):
     """Something a species representative says. `grounding` lists the data behind each claim."""
 
@@ -52,7 +43,6 @@ class Statement(BaseModel):
     grounding: list[Grounding] = []
     disclaimer: str
     topic: str | None = None
-    voice: VoiceInfo | None = None
 
 
 class Detail(BaseModel):

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { BookOpen, Cpu, HeartHandshake, MessageCircle, Send, ShieldQuestion, Sparkles } from "lucide-react";
+import { BookOpen, HeartHandshake, MessageCircle, Send, ShieldQuestion, Sparkles } from "lucide-react";
 
 import type { WildlifeActivity, WildlifeRepresentative } from "../../types";
 import { liveApi } from "../../services/live/api";
@@ -107,18 +107,7 @@ export default function LiveRepresentative({ slug, representative, activity, top
           role="status"
           aria-live="polite"
         >
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-sage">{current.heading}</p>
-            {statement?.voice && (
-              <span
-                title={statement.voice.reason ?? undefined}
-                className="inline-flex items-center gap-1 rounded-full border border-white/20 px-2 py-0.5 text-[10px] text-sage"
-              >
-                <Cpu size={11} aria-hidden="true" />
-                {statement.voice.engine === "llm" ? `Local LLM · ${statement.voice.model ?? ""}` : "Template voice"}
-              </span>
-            )}
-          </div>
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-sage">{current.heading}</p>
           {statement ? (
             <div className="space-y-2 text-base leading-relaxed text-white sm:text-lg">
               {statement.lines.map((line, index) => (

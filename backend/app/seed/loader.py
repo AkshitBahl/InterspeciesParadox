@@ -28,7 +28,6 @@ from app.seed.species_data import DATA_NOTE, SPECIES
 from app.services import (
     agreement_service,
     conflict_service,
-    llm,
     negotiation_service,
     solution_engine,
 )
@@ -226,8 +225,7 @@ def run(db: Session, *, with_demo: bool = True, do_reset: bool = False) -> dict[
     features = seed_map(db, species)
     users = seed_users(db, features)
     if with_demo:
-        with llm.paused():  # the demo story always uses the templates: fast and repeatable
-            seed_story(db, users, features)
+        seed_story(db, users, features)
     db.commit()
     from app.models import Conflict
 

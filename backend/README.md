@@ -87,40 +87,7 @@ TEST_DATABASE_URL=postgresql+psycopg://paradox:paradox@localhost:5432/interspeci
 ruff check .
 ```
 
-OSRM, Nominatim and the LLM are faked in the tests, so they run without internet.
-
-### Optional: a free local LLM voice (Ollama)
-
-By default the representatives speak from templates. You can give them a livelier voice with a
-free, open-source model running on your own computer. No account, no API key, no cost.
-
-1. Install [Ollama](https://ollama.com) (on a Mac: download the app, or `brew install ollama`) and open it.
-2. Download a model: `ollama pull qwen2.5:7b` (about 4.7 GB, for 16 GB of memory or more).
-   With 8 GB, use `ollama pull llama3.2:3b` (about 2 GB) and `LLM_MODEL=llama3.2:3b`.
-3. Add to `.env` and restart the server:
-   ```
-   LLM_ENABLED=true
-   LLM_BASE_URL=http://localhost:11434/v1
-   LLM_MODEL=qwen2.5:7b
-   LLM_TEMPERATURE=0.9        # optional: higher = livelier and more varied
-   LLM_CACHE_SECONDS=120      # optional: the same request within 2 minutes gets the same reply
-   ```
-   With Docker: `LLM_ENABLED=true docker compose up` (it already points at `host.docker.internal:11434`).
-4. Check `http://localhost:8000/health`: `llm.reachable` and `llm.model_ready` should both be `true`.
-
-How it stays honest, step by step:
-
-1. The rules still decide everything: scores, safety gates, accept / counter / reject.
-2. The model only re-words the template statement, line by line, in the representative's personality.
-   For `/representative/ask` and negotiation chat it answers any question from the species' fact sheet,
-   and says which facts it used (they become `grounding`).
-3. Every reply is checked: same number of lines, no number or month that isn't in the data, no "as an AI".
-4. If the check fails, or Ollama is off or slow (`LLM_TIMEOUT_SECONDS`, default 30), you get the template.
-   `statement.voice` tells you which one you got (`engine: "llm"` or `"template"`, plus the `reason`).
-
-The demo story written by `python -m app.seed` always uses the templates. Generated solution comments do too,
-so generating 5 solutions stays instant. Any server with an OpenAI-style `/chat/completions` endpoint works
-(LM Studio, llama.cpp...): change `LLM_BASE_URL` and `LLM_MODEL`.
+OSRM and Nominatim are faked in the tests, so they run without internet.
 
 ---
 
@@ -196,7 +163,7 @@ Useful map endpoints:
 | `GET /map/locations` | Named dataset places where users can drop people or animals. |
 | `POST /map/features` | Add your own resident, animal, nest, path... (a nest gets its seasonal buffer automatically). Drag it with `PATCH`. |
 | `GET /map/animations` | Moving things (wildlife on corridors, residents on journeys, delivery bikes and robots) with `coordinates`, `duration_ms` and keyframes. Animate with `turf.along()`. |
-| `POST /map/export/markdown` | Turn a drawn area (bbox, polygon or conflict) into a Markdown brief + JSON summary for an LLM. Add `question` to append a task. |
+| `POST /map/export/markdown` | Turn a drawn area (bbox, polygon or conflict) into a readable Markdown brief + JSON summary. Add `question` to append a task for the reader. |
 | `GET /geo/search?q=moss` | Dataset places first, then OpenStreetMap (Nominatim). |
 | `POST /geo/route` | Route preview with alternatives, steps, time and a **wildlife disturbance score**. If every route crosses an active quiet zone, a wildlife-friendly detour is added. `wildlife.nearby` lists every animal along each route. |
 | `POST /geo/route/negotiate` | **Route negotiation.** Give a start and an end: you get the fastest route, every animal along it, each disturbed species' objection, and the agreed result: a detour (`rerouted`), conditions such as "keep dogs on a lead" (`conditions`), or nothing to change (`no_conflict`). `steps` tells the story; `geojson` draws it (`properties.role`). |
@@ -243,22 +210,21 @@ backend/
 │   │   ├── negotiation_service.py  step 7
 │   │   ├── agreement_service.py    step 8
 │   │   ├── representative.py       the voices of the animals (template based, grounded)
-│   │   ├── llm.py, llm_voice.py    optional free local LLM voice (Ollama), checked against the data
 │   │   ├── map_service.py          GeoJSON + current/proposed scenarios
 │   │   ├── routing.py, route_negotiation.py, path_network.py, search.py, external.py
 │   │   ├── animations.py, markdown_export.py
 │   │   └── geo.py, seasons.py, context.py
 │   └── seed/                   species data, the Brussels dataset, the demo story
 ├── alembic/                    database migrations
-└── tests/                      pytest (95 tests)
+└── tests/                      pytest (82 tests)
 ```
 
 ### Design choices (and why)
 
 * **No PostGIS.** Geometry is stored as GeoJSON (JSONB in PostgreSQL) with bounding-box columns; maths is done
   in Python with Shapely in metres. One less thing to install for a hackathon. PostGIS can be added later.
-* **No LLM needed, one optional.** The representatives use templates filled with data, so they never invent
-  biology. A free local model (Ollama) can re-word them, but only after a check against the data, with the
-  templates as the fallback. The Markdown export is there if you want to hand a whole area to an LLM.
+* **No LLM, on purpose.** Running a language model costs a lot of energy, which doesn't fit a sustainability
+  project. The representatives use templates filled with data instead: they never invent biology, answer
+  instantly, give the same answer every time (easy to test), and run on any laptop.
 * **Temporary agreements.** Agreements end with the season and have review dates, because wildlife changes.
 * **Simulated clock.** The story is set in 2126 and seasons matter, so "today" is a setting.

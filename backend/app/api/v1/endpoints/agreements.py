@@ -53,7 +53,7 @@ def get_agreement(agreement_id: uuid.UUID, db: DbSession):
 
 @router.get("/agreements/{agreement_id}/markdown", response_class=PlainTextResponse)
 def agreement_markdown(agreement_id: uuid.UUID, db: DbSession) -> PlainTextResponse:
-    """The agreement as a Markdown document (print it, share it, or give it to an LLM)."""
+    """The agreement as a Markdown document (print it or share it)."""
     agreement = get_or_404(db, Agreement, agreement_id, "Agreement")
     return PlainTextResponse(agreement.markdown, media_type="text/markdown; charset=utf-8")
 

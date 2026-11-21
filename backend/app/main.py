@@ -11,7 +11,6 @@ from fastapi.responses import JSONResponse
 from app.api.v1.router import api_router
 from app.core import clock
 from app.core.config import settings
-from app.services import llm
 from app.services.agreement_service import AgreementError
 from app.services.conflict_service import ConflictError
 from app.services.external import ExternalServiceError
@@ -47,7 +46,7 @@ app = FastAPI(
         {"name": "solutions & coexistence index", "description": "Step 6 in detail, plus what-if previews."},
         {"name": "negotiation", "description": "Step 7."},
         {"name": "agreements", "description": "Step 8."},
-        {"name": "map", "description": "GeoJSON layers, scenarios, animations, LLM export."},
+        {"name": "map", "description": "GeoJSON layers, scenarios, animations, Markdown export."},
         {"name": "search & routing", "description": "Nominatim search and wildlife-aware OSRM routing."},
     ],
 )
@@ -79,12 +78,11 @@ app.include_router(api_router, prefix=settings.api_v1_prefix)
 
 @app.get("/health", tags=["meta"])
 def health() -> dict:
-    """Server status, plus whether the optional local LLM voice is switched on and reachable."""
+    """Server status and the simulated date."""
     return {
         "status": "ok",
         "simulation_date": clock.today().isoformat(),
         "environment": settings.environment,
-        "llm": llm.status(),
     }
 
 

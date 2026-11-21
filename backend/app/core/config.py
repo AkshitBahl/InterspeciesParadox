@@ -56,19 +56,6 @@ class Settings(BaseSettings):
     geo_user_agent: str = "InterspeciesParadox/0.1 (hackathon demo backend)"
     external_timeout_seconds: float = 6.0
 
-    # --- Free local LLM voice (optional) ---------------------------------------
-    # Off by default: the representatives then speak from their templates.
-    # With Ollama running on your machine, set LLM_ENABLED=true. Any server with
-    # an OpenAI-style /chat/completions endpoint works (LM Studio, llama.cpp...).
-    llm_enabled: bool = False
-    llm_base_url: str = "http://localhost:11434/v1"
-    llm_model: str = "qwen2.5:7b"
-    llm_api_key: str = ""  # Ollama needs none
-    llm_timeout_seconds: float = 30.0
-    llm_temperature: float = 0.9  # higher = livelier and more varied (the data check still applies)
-    llm_cache_seconds: float = 120.0  # the same request within this time gets the same reply, instantly
-    llm_max_tokens: int = 400
-
     @field_validator("simulated_today", mode="before")
     @classmethod
     def _real_clock(cls, value: object) -> object:

@@ -82,7 +82,7 @@ class ExportRequest(BaseModel):
     extra_features: dict[str, Any] | None = Field(
         None, description="Unsaved user-drawn GeoJSON Feature or FeatureCollection (e.g. marked intervention zones)"
     )
-    question: str | None = Field(None, max_length=2000, description="Optional task for the LLM, appended at the end")
+    question: str | None = Field(None, max_length=2000, description="Optional question or task for the reader, appended at the end")
     include_geojson: bool = False
     title: str | None = Field(None, max_length=200)
 

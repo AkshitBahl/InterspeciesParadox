@@ -1,6 +1,6 @@
-"""Export a map area as Markdown for an LLM (plus a structured JSON summary).
+"""Export a map area as a readable Markdown brief (plus a structured JSON summary).
 
-Why not a screenshot? An LLM reads facts much better than pixels. So we turn
+Why not a screenshot? Facts are easier to read, search and share than pixels. So we turn
 the real geometry into plain statements: "the main entrance is 4.0 m from the
 house martin nest, inside its 6 m seasonal buffer (active now)".
 

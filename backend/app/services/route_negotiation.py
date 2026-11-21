@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session
 
 from app.core import clock
 from app.models import Species
-from app.services import llm_voice, routing
+from app.services import routing
 from app.services.external import ExternalServiceError
 from app.services.map_service import current_scenario_features, species_lookup
 from app.services.representative import Voice, format_months, site_word
@@ -180,7 +180,7 @@ def negotiate_route(
                 if c not in all_conditions:
                     all_conditions.append(c)
         v.ground_legal()
-        statement = llm_voice.speak(v, "route_negotiation")
+        statement = v.statement("route_negotiation")
         statements.append(statement)
         step(statement["speaker"], statement["lines"][0], "objection")
         step(statement["speaker"], " ".join(statement["lines"][1:]), "reply")

@@ -5,7 +5,7 @@ Typical frontend flow:
 2. GET /map/features              -> one GeoJSON FeatureCollection with every layer
 3. GET /map/scenarios/{id}/compare -> toggle "Current situation" / "Proposed solution"
 4. GET /map/animations?solution_id -> moving birds, residents and delivery robots
-5. POST /map/export/markdown      -> LLM-readable brief of a selected area
+5. POST /map/export/markdown      -> readable Markdown brief of a selected area
 """
 
 import uuid
@@ -316,7 +316,7 @@ def get_animations(
 
 @router.post("/export/markdown", response_model=ExportResponse)
 def export_markdown(body: ExportRequest, db: DbSession) -> dict:
-    """Turn a map area into an LLM-readable Markdown brief + structured JSON (no screenshots needed)."""
+    """Turn a map area into a readable Markdown brief + structured JSON (no screenshots needed)."""
     return markdown_export.export_area(db, **body.model_dump())
 
 
