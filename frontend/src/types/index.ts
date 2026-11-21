@@ -18,3 +18,37 @@ export interface HumanProfile {
     quietEnvironment: number;
   };
 }
+
+export type ConflictType =
+  | "access"
+  | "noise"
+  | "safety"
+  | "property"
+  | "other";
+
+export type WildlifeActivity =
+  | "nesting"
+  | "moving"
+  | "feeding"
+  | "resting"
+  | "unknown";
+
+export interface ConflictReport {
+  id: string;
+  title: string;
+  description: string;
+  speciesId: string;
+  conflictType: ConflictType;
+  observedActivity: WildlifeActivity;
+  location: string;
+  severity: number;
+  affectedNeeds: string[];
+  accessBlocked: boolean;
+  status: "reported" | "assessing" | "mediation" | "agreed";
+  createdAt: string;
+}
+
+export type ConflictDraft = Omit<
+  ConflictReport,
+  "id" | "status" | "createdAt"
+>;

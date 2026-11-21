@@ -1,3 +1,4 @@
+import ReportConflictPage from "../features/conflict/ReportConflictPage";
 import ProfilePage from "../features/profile/ProfilePage";
 import { createBrowserRouter } from "react-router-dom";
 
@@ -9,9 +10,7 @@ function ComingSoon({ title }: { title: string }) {
     <div className="rounded-3xl border border-forest/10 bg-white p-10">
       <p className="mb-3 text-sm text-leaf">Coming next</p>
 
-      <h1 className="text-3xl font-bold text-forest">
-        {title}
-      </h1>
+      <h1 className="text-3xl font-bold text-forest">{title}</h1>
 
       <p className="mt-3 text-ink/60">
         We'll build this screen in the next steps.
@@ -26,16 +25,16 @@ export const router = createBrowserRouter([
     element: <AppLayout />,
     children: [
       {
-    index: true,
-    element: <DashboardPage />,
-  },
-  {
-    path: "profile",
-    element: <ProfilePage />,
-  },
+        index: true,
+        element: <DashboardPage />,
+      },
+      {
+        path: "profile",
+        element: <ProfilePage />,
+      },
       {
         path: "conflict/new",
-        element: <ComingSoon title="Report a Conflict" />,
+        element: <ReportConflictPage />,
       },
       {
         path: "conflict/:id/assessment",
