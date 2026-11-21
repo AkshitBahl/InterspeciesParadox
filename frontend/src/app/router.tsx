@@ -1,56 +1,51 @@
 import AssessmentPage from "../features/assessment/AssessmentPage";
 import ReportConflictPage from "../features/conflict/ReportConflictPage";
 import ProfilePage from "../features/profile/ProfilePage";
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, type RouteObject } from "react-router-dom";
 import MediationPage from "../features/mediation/MediationPage";
 import AgreementPage from "../features/agreement/AgreementPage";
 
 import AppLayout from "../components/layout/AppLayout";
 import DashboardPage from "../features/dashboard/DashboardPage";
 
-// function ComingSoon({ title }: { title: string }) {
-//   return (
-//     <div className="rounded-3xl border border-forest/10 bg-white p-10">
-//       <p className="mb-3 text-sm text-leaf">Coming next</p>
+import { USE_MOCKS } from "../services/conflictGateway";
+import LoginPage from "../features/live/LoginPage";
+import RequireLogin from "../features/live/RequireLogin";
+import LiveReportConflictPage from "../features/live/LiveReportConflictPage";
+import LiveAssessmentPage from "../features/live/LiveAssessmentPage";
+import LiveMediationPage from "../features/live/LiveMediationPage";
+import LiveAgreementPage from "../features/live/LiveAgreementPage";
 
-//       <h1 className="text-3xl font-bold text-forest">{title}</h1>
+// Mock mode (VITE_USE_MOCKS=true): everything runs in the browser with demo data.
+const mockRoutes: RouteObject[] = [
+  { index: true, element: <DashboardPage /> },
+  { path: "profile", element: <ProfilePage /> },
+  { path: "conflict/new", element: <ReportConflictPage /> },
+  { path: "conflict/:id/assessment", element: <AssessmentPage /> },
+  { path: "conflict/:id/mediation", element: <MediationPage /> },
+  { path: "conflict/:id/agreement", element: <AgreementPage /> },
+];
 
-//       <p className="mt-3 text-ink/60">
-//         We'll build this screen in the next steps.
-//       </p>
-//     </div>
-//   );
-// }
+// Live mode (VITE_USE_MOCKS=false): the same screens, backed by the FastAPI backend.
+const liveRoutes: RouteObject[] = [
+  { index: true, element: <DashboardPage /> },
+  { path: "login", element: <LoginPage /> },
+  {
+    element: <RequireLogin />,
+    children: [
+      { path: "profile", element: <ProfilePage /> },
+      { path: "conflict/new", element: <LiveReportConflictPage /> },
+      { path: "conflict/:id/assessment", element: <LiveAssessmentPage /> },
+      { path: "conflict/:id/mediation", element: <LiveMediationPage /> },
+      { path: "conflict/:id/agreement", element: <LiveAgreementPage /> },
+    ],
+  },
+];
 
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <AppLayout />,
-    children: [
-      {
-        index: true,
-        element: <DashboardPage />,
-      },
-      {
-        path: "profile",
-        element: <ProfilePage />,
-      },
-      {
-        path: "conflict/new",
-        element: <ReportConflictPage />,
-      },
-      {
-        path: "conflict/:id/assessment",
-        element: <AssessmentPage />,
-      },
-      {
-        path: "conflict/:id/mediation",
-        element: <MediationPage />,
-      },
-      {
-        path: "conflict/:id/agreement",
-        element: <AgreementPage />,
-      },
-    ],
+    children: USE_MOCKS ? mockRoutes : liveRoutes,
   },
 ]);

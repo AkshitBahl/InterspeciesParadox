@@ -1,5 +1,7 @@
 import { ArrowUpRight, Menu, Radio } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import AccountBadge from "../../features/live/AccountBadge";
+import { USE_MOCKS } from "../../services/conflictGateway";
 
 interface NavbarProps {
   onMenuClick: () => void;
@@ -9,6 +11,7 @@ const pageNames: Record<string, string> = {
   "/": "The living city",
   "/profile": "Human representative",
   "/conflict/new": "New coexistence case",
+  "/login": "Resident login",
 };
 
 export default function Navbar({ onMenuClick }: NavbarProps) {
@@ -33,6 +36,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
           <Radio size={14} strokeWidth={1.7} aria-hidden="true" />
           <span className="text-[10px] font-semibold uppercase tracking-[0.12em]">Coexistence network</span>
         </div>
+        {!USE_MOCKS && <AccountBadge />}
         <Link to="/conflict/new" className="kinship-new-case inline-flex items-center gap-2 rounded-full px-3 py-2.5 text-[11px] font-semibold sm:px-4" aria-label="Report a new conflict">
           <span className="hidden sm:inline">New case</span><span className="sm:hidden">Report</span>
           <ArrowUpRight size={15} strokeWidth={1.8} aria-hidden="true" />

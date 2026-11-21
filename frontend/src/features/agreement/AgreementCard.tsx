@@ -8,7 +8,7 @@ import {
   UserRound,
 } from "lucide-react";
 import Card from "../../components/ui/Card";
-import type { AgreementPreview, AgreementTermGroup } from "../../types/agreement";
+import type { AgreementPreview, AgreementTermGroup } from "../../types/agreements";
 
 const groups = [
   { key: "wildlife", label: "01 / Wildlife protection", icon: Leaf },

@@ -15,6 +15,12 @@ import type {
 interface ConflictFormProps {
   onSubmit: (draft: ConflictDraft) => void;
   isSubmitting: boolean;
+  /** Live mode: species from the backend instead of the mock list. */
+  speciesOptions?: { id: string; name: string; emoji: string }[];
+  /** Live mode: pick a mapped place; `draft.location` then holds its id. */
+  locationOptions?: { value: string; label: string; group: string }[];
+  /** Replaces the "saved in this browser" note under the submit button. */
+  saveNote?: string;
 }
 
 const conflictTypes: {
@@ -68,10 +74,16 @@ const inputStyle =
 export default function ConflictForm({
   onSubmit,
   isSubmitting,
+  speciesOptions = wildlifeOptions,
+  locationOptions,
+  saveNote = "Your report will be saved in this browser for the prototype.",
 }: ConflictFormProps) {
-  const [draft, setDraft] = useState<ConflictDraft>(
-    initialDraft
-  );
+  const [draft, setDraft] = useState<ConflictDraft>(() => ({
+    ...initialDraft,
+    speciesId: speciesOptions.some((animal) => animal.id === initialDraft.speciesId)
+      ? initialDraft.speciesId
+      : (speciesOptions[0]?.id ?? initialDraft.speciesId),
+  }));
   const [error, setError] = useState("");
 
   function update<K extends keyof ConflictDraft>(
@@ -222,7 +234,7 @@ export default function ConflictForm({
                 update("speciesId", e.target.value)
               }
             >
-              {wildlifeOptions.map((animal) => (
+              {speciesOptions.map((animal) => (
                 <option key={animal.id} value={animal.id}>
                   {animal.emoji} {animal.name}
                 </option>
@@ -261,20 +273,45 @@ export default function ConflictForm({
               Where is the conflict happening? *
             </span>
 
-            <input
-              className={inputStyle}
-              required
-              maxLength={200}
-              placeholder="Apartment building entrance, shared courtyard..."
-              value={draft.location}
-              onChange={(e) =>
-                update("location", e.target.value)
-              }
-            />
+            {locationOptions ? (
+              <select
+                className={inputStyle}
+                required
+                value={draft.location}
+                onChange={(e) =>
+                  update("location", e.target.value)
+                }
+              >
+                <option value="">Choose a place on the neighborhood map</option>
+                {[...new Set(locationOptions.map((o) => o.group))].map((group) => (
+                  <optgroup key={group} label={group}>
+                    {locationOptions
+                      .filter((o) => o.group === group)
+                      .map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                  </optgroup>
+                ))}
+              </select>
+            ) : (
+              <input
+                className={inputStyle}
+                required
+                maxLength={200}
+                placeholder="Apartment building entrance, shared courtyard..."
+                value={draft.location}
+                onChange={(e) =>
+                  update("location", e.target.value)
+                }
+              />
+            )}
 
             <span className="mt-2 block text-xs text-ink/50">
-              A general location is enough for this demo.
-              No private address is required.
+              {locationOptions
+                ? "Places come from the demo Brussels neighborhood map. Pick where people are affected."
+                : "A general location is enough for this demo. No private address is required."}
             </span>
           </label>
         </section>
@@ -419,8 +456,7 @@ export default function ConflictForm({
           </Button>
 
           <p className="mt-3 text-xs text-ink/50">
-            Your report will be saved in this browser
-            for the prototype.
+            {saveNote}
           </p>
         </div>
       </form>
