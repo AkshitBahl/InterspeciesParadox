@@ -10,6 +10,8 @@ import {
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
 
+import RecentCases from "./RecentCases";
+
 const features = [
   {
     title: "Your Needs Matter",
@@ -133,6 +135,7 @@ export default function DashboardPage() {
           })}
         </div>
       </section>
+      <RecentCases />
     </div>
   );
 }

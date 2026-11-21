@@ -2,6 +2,8 @@ import AssessmentPage from "../features/assessment/AssessmentPage";
 import ReportConflictPage from "../features/conflict/ReportConflictPage";
 import ProfilePage from "../features/profile/ProfilePage";
 import { createBrowserRouter } from "react-router-dom";
+import MediationPage from "../features/mediation/MediationPage";
+import AgreementPage from "../features/agreement/AgreementPage";
 
 import AppLayout from "../components/layout/AppLayout";
 import DashboardPage from "../features/dashboard/DashboardPage";
@@ -43,11 +45,11 @@ export const router = createBrowserRouter([
       },
       {
         path: "conflict/:id/mediation",
-        element: <ComingSoon title="Mediation Studio" />,
+        element: <MediationPage />,
       },
       {
         path: "conflict/:id/agreement",
-        element: <ComingSoon title="Coexistence Agreement" />,
+        element: <AgreementPage />,
       },
     ],
   },
