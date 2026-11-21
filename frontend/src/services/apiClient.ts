@@ -7,12 +7,12 @@ const configuredBase = import.meta.env.VITE_API_BASE_URL?.trim();
 export const API_BASE_URL = (configuredBase || "http://localhost:8000").replace(/\/+$/, "");
 
 export class ApiRequestError extends Error {
-  constructor(
-    message: string,
-    public readonly status: number | null,
-  ) {
+  readonly status: number | null;
+
+  constructor(message: string, status: number | null) {
     super(message);
     this.name = "ApiRequestError";
+    this.status = status;
   }
 }
 

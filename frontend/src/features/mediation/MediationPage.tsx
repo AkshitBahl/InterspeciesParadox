@@ -20,6 +20,8 @@ import CoexistenceIndex from "./CoexistenceIndex";
 import NegotiationPanel from "./NegotiationPanel";
 import MediationMap from "./MediationMap";
 
+import WildlifeDialogue from "../wildlife/WildlifeDialogue";
+
 export default function MediationPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -114,11 +116,13 @@ export default function MediationPage() {
           adjustments={selectedAdjustments}
           onChange={(changes) => setModifications((previous) => ({ ...previous, [selected.plan.id]: changes }))}
         />
-        <div className="rounded-3xl bg-forest p-6 text-cream">
-          <p className="text-sm font-semibold uppercase tracking-wider text-sage">{wildlife.emoji} {wildlife.name} says…</p>
-          <blockquote className="mt-5 text-lg leading-relaxed">“{selected.plan.wildlifeMessage}”</blockquote>
-          <p className="mt-5 text-xs leading-relaxed text-sage/80">Fictional dialogue translating illustrative biological concerns. The animal has not literally agreed, and this proposal is not professionally approved.</p>
-        </div>
+        <WildlifeDialogue
+  key={`${wildlife.id}-${selected.plan.id}`}
+  representative={wildlife}
+  activity={conflict.observedActivity}
+  featuredMessage={selected.plan.wildlifeMessage}
+  compact
+/>
       </section>
 
       <section className="rounded-3xl bg-sage/25 p-7 sm:p-9">

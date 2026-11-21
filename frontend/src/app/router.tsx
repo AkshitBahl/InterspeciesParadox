@@ -8,19 +8,19 @@ import AgreementPage from "../features/agreement/AgreementPage";
 import AppLayout from "../components/layout/AppLayout";
 import DashboardPage from "../features/dashboard/DashboardPage";
 
-function ComingSoon({ title }: { title: string }) {
-  return (
-    <div className="rounded-3xl border border-forest/10 bg-white p-10">
-      <p className="mb-3 text-sm text-leaf">Coming next</p>
+// function ComingSoon({ title }: { title: string }) {
+//   return (
+//     <div className="rounded-3xl border border-forest/10 bg-white p-10">
+//       <p className="mb-3 text-sm text-leaf">Coming next</p>
 
-      <h1 className="text-3xl font-bold text-forest">{title}</h1>
+//       <h1 className="text-3xl font-bold text-forest">{title}</h1>
 
-      <p className="mt-3 text-ink/60">
-        We'll build this screen in the next steps.
-      </p>
-    </div>
-  );
-}
+//       <p className="mt-3 text-ink/60">
+//         We'll build this screen in the next steps.
+//       </p>
+//     </div>
+//   );
+// }
 
 export const router = createBrowserRouter([
   {
