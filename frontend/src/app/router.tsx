@@ -1,3 +1,4 @@
+import AssessmentPage from "../features/assessment/AssessmentPage";
 import ReportConflictPage from "../features/conflict/ReportConflictPage";
 import ProfilePage from "../features/profile/ProfilePage";
 import { createBrowserRouter } from "react-router-dom";
@@ -38,7 +39,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "conflict/:id/assessment",
-        element: <ComingSoon title="Needs Assessment" />,
+        element: <AssessmentPage />,
       },
       {
         path: "conflict/:id/mediation",

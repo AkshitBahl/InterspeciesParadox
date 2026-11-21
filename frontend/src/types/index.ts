@@ -52,3 +52,36 @@ export type ConflictDraft = Omit<
   ConflictReport,
   "id" | "status" | "createdAt"
 >;
+
+
+export type NeedPriority = "essential" | "preference";
+
+export interface AssessedNeed {
+  id: string;
+  title: string;
+  description: string;
+  priority: NeedPriority;
+}
+
+export interface WildlifeRepresentative {
+  id: string;
+  name: string;
+  emoji: string;
+  personality: string;
+  introduction: string;
+}
+
+export interface NeedTension {
+  id: string;
+  title: string;
+  description: string;
+  type: "conflict" | "shared";
+}
+
+export interface AssessmentResult {
+  conflictId: string;
+  humanNeeds: AssessedNeed[];
+  wildlifeNeeds: AssessedNeed[];
+  tensions: NeedTension[];
+  needsSpeciesVerification: boolean;
+}
