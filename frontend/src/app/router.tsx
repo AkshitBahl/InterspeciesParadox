@@ -21,6 +21,9 @@ import LiveAgreementPage from "../features/live/LiveAgreementPage";
 // (The router file is not hot-reloaded as a component, so this lint rule doesn't apply.)
 // eslint-disable-next-line react-refresh/only-export-components
 const IntroPage = lazy(() => import("../features/intro/IntroPage"));
+// The full-page neighborhood map, also lazy so Leaflet loads only when it is needed.
+// eslint-disable-next-line react-refresh/only-export-components
+const MapPage = lazy(() => import("../features/map/MapPage"));
 
 // Mock mode (VITE_USE_MOCKS=true): everything runs in the browser with demo data.
 const mockRoutes: RouteObject[] = [
@@ -54,6 +57,15 @@ export const router = createBrowserRouter([
     element: (
       <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-forest text-cream">Growing your neighborhood…</div>}>
         <IntroPage />
+      </Suspense>
+    ),
+  },
+  {
+    // Full screen, outside the app layout, so the map gets the whole page. Public in both modes.
+    path: "/map",
+    element: (
+      <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-forest text-cream">Drawing the neighborhood…</div>}>
+        <MapPage />
       </Suspense>
     ),
   },

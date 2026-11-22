@@ -6,6 +6,7 @@ import {
   HeartHandshake,
   LayoutDashboard,
   Leaf,
+  MapPinned,
   Scale,
   ScrollText,
   UserRound,
@@ -14,11 +15,12 @@ import {
 
 const navigation = [
   { label: "Overview", path: "/dashboard", icon: LayoutDashboard, number: "01" },
-  { label: "My profile", path: "/profile", icon: UserRound, number: "02" },
-  { label: "Report conflict", path: "/conflict/new", icon: FilePlus2, number: "03" },
-  { label: "Needs assessment", path: "/conflict/demo/assessment", icon: Scale, number: "04", section: "assessment" },
-  { label: "Mediation studio", path: "/conflict/demo/mediation", icon: HeartHandshake, number: "05", section: "mediation" },
-  { label: "Agreements", path: "/conflict/demo/agreement", icon: ScrollText, number: "06", section: "agreement" },
+  { label: "Neighborhood map", path: "/map", icon: MapPinned, number: "02" },
+  { label: "My profile", path: "/profile", icon: UserRound, number: "03" },
+  { label: "Report conflict", path: "/conflict/new", icon: FilePlus2, number: "04" },
+  { label: "Needs assessment", path: "/conflict/demo/assessment", icon: Scale, number: "05", section: "assessment" },
+  { label: "Mediation studio", path: "/conflict/demo/mediation", icon: HeartHandshake, number: "06", section: "mediation" },
+  { label: "Agreements", path: "/conflict/demo/agreement", icon: ScrollText, number: "07", section: "agreement" },
 ];
 
 interface SidebarProps {
