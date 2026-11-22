@@ -9,7 +9,7 @@ import FeatureDetails from "./FeatureDetails";
 import MapGuide from "./MapGuide";
 import MapLegend from "./MapLegend";
 import NeighborhoodMap, { type DetailsInset, type FocusRequest, type MapPadding } from "./NeighborhoodMap";
-import { loadNeighborhood, type MapFeature } from "./mapData";
+import { loadNeighborhood, tidy, type MapFeature } from "./mapData";
 import { FOCUS_VIEWS, categoryOf, type CategoryKey } from "./mapStyle";
 
 const GUIDE_KEY = "kinship-map-guide-seen";
@@ -52,6 +52,8 @@ export default function MapPage() {
   const [legendOpen, setLegendOpen] = useState(isWide);
   const [heardOne, setHeardOne] = useState(false);
   const [scenario, setScenario] = useState<"today" | "plan">("plan");
+  // Each quick view starts from the whole district again.
+  const [viewRound, setViewRound] = useState(0);
   const playTimer = useRef<number | undefined>(undefined);
 
   const padding = useMemo<MapPadding>(() => (isWide() ? { topLeft: [350, 70], bottomRight: [40, 40] } : { topLeft: [16, 70], bottomRight: [16, 60] }), []);
@@ -116,6 +118,8 @@ export default function MapPage() {
     if (!view) return;
     setViewKey(key);
     setVisible(new Set(view.categories));
+    setSelectedId(null);
+    setViewRound((n) => n + 1);
   };
 
   const toggle = (key: CategoryKey) => {
@@ -136,15 +140,14 @@ export default function MapPage() {
   return (
     <div className="kin-map-page">
       <header className="kin-map-topbar">
-        <div className="flex min-w-0 items-center gap-3">
-          <Link to="/dashboard" className="kin-map-brand" aria-label="Back to the Kinship dashboard">
-            <span className="kin-map-brand-mark"><Leaf size={17} strokeWidth={1.8} aria-hidden="true" /></span>
-            <span className="hidden sm:inline">kinship<span className="text-[#9fd08a]">.</span></span>
+        <div className="flex min-w-0 items-center gap-2.5">
+          <Link to="/dashboard" className="kin-icon-button" aria-label="Back to the dashboard" title="Back">
+            <ArrowLeft size={17} />
           </Link>
-          <div className="min-w-0">
-            <h1 className="truncate text-[15px] font-semibold leading-tight text-[#f3f4df]">Neighborhood map</h1>
-            <p className="truncate text-[11px] text-[#a9c2b3]">Ixelles Ponds Eco-District · Brussels 2126</p>
-          </div>
+          <span className="kin-map-brand-mark" aria-hidden="true"><Leaf size={16} strokeWidth={1.8} /></span>
+          <h1 className="kin-map-title">
+            <span className="sr-only">Neighborhood map, </span>Ixelles Ponds <span>2126</span>
+          </h1>
         </div>
 
         <nav className="kin-views" aria-label="What to show">
@@ -167,21 +170,16 @@ export default function MapPage() {
                 setPlayingId(null);
               }
             }}
-            className="kin-topbar-button"
+            className="kin-icon-button"
             aria-pressed={soundOn}
-            title={soundOn ? "Animal sounds are on" : "Animal sounds are off"}
+            aria-label="Animal sounds"
+            title={soundOn ? "Sound on" : "Sound off"}
           >
             {soundOn ? <Volume2 size={17} /> : <VolumeX size={17} />}
-            <span className="hidden xl:inline">{soundOn ? "Sounds on" : "Sounds off"}</span>
           </button>
-          <button type="button" onClick={() => setGuideOpen(true)} className="kin-topbar-button" title="How to read this map">
+          <button type="button" onClick={() => setGuideOpen(true)} className="kin-icon-button" aria-label="Help" title="Help">
             <CircleHelp size={17} />
-            <span className="hidden xl:inline">Help</span>
           </button>
-          <Link to="/dashboard" className="kin-topbar-button" title="Back to the studio">
-            <ArrowLeft size={17} />
-            <span className="hidden md:inline">Studio</span>
-          </Link>
         </div>
       </header>
 
@@ -198,15 +196,15 @@ export default function MapPage() {
             focus={focus}
             padding={padding}
             detailsInset={selected ? detailsInset : undefined}
-            fitKey={showingPlan ? "plan" : "today"}
+            fitKey={`${showingPlan ? "plan" : "today"}:${viewRound}`}
           />
         )}
 
-        {data.loading && <div className="kin-map-status">Drawing the neighborhood…</div>}
+        {data.loading && !data.data && <div className="kin-map-status">Loading map</div>}
         {data.error && (
           <div className="kin-map-status" role="alert">
-            The map could not load: {data.error}{" "}
-            <button type="button" className="underline" onClick={data.reload}>Try again</button>
+            Map unavailable.{" "}
+            <button type="button" className="underline" onClick={data.reload}>Retry</button>
           </div>
         )}
 
@@ -227,10 +225,10 @@ export default function MapPage() {
         )}
 
         {planFeatures && (
-          <div className="kin-scenario" role="group" aria-label="Compare today with the plan">
-            <button type="button" aria-pressed={!showingPlan} onClick={() => setScenario("today")}>Today</button>
-            <button type="button" aria-pressed={showingPlan} onClick={() => setScenario("plan")}>
-              With the plan<span className="hidden sm:inline">: {data.data?.planTitle}</span>
+          <div className="kin-scenario" role="group" aria-label="Compare now with the plan">
+            <button type="button" aria-pressed={!showingPlan} onClick={() => setScenario("today")}>Now</button>
+            <button type="button" aria-pressed={showingPlan} onClick={() => setScenario("plan")} title={tidy(data.data?.planTitle)}>
+              With plan
             </button>
           </div>
         )}
@@ -250,14 +248,10 @@ export default function MapPage() {
         <div className="kin-map-footnote">
           {!heardOne && data.data && !selected && (
             <span className="kin-hint">
-              <Volume2 size={14} aria-hidden="true" /> Tap an orange animal pin to hear it
+              <Volume2 size={14} aria-hidden="true" /> Tap an animal
             </span>
           )}
-          {data.data && (
-            <span className="kin-source">
-              {data.data.source === "live" ? "Live from the backend" : "Offline copy of the demo dataset"} · fictional 2126 data
-            </span>
-          )}
+          {data.data?.source === "offline" && <span className="kin-source">Offline</span>}
         </div>
 
         {guideOpen && <MapGuide onClose={closeGuide} />}

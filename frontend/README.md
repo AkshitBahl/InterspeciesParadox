@@ -1,6 +1,6 @@
 # The Interspecies Paradox — frontend
 
-React 19 + Vite + Tailwind + Leaflet. The app has two modes:
+React 19 + Vite + Tailwind, with MapLibre GL for the neighborhood map (Leaflet is still used by the mock mediation map). The app has two modes:
 
 | Mode | `VITE_USE_MOCKS` | What it does |
 |---|---|---|
@@ -33,32 +33,36 @@ The map is the main feature, so it has its own full-screen page at http://localh
 `GET /api/v1/map/features` from the backend; mock mode, or a backend that is not running, uses
 the offline copy of the same dataset in `public/data/ixelles-ponds-2126.geojson`.
 
+It is drawn with [MapLibre GL JS](https://maplibre.org/) (open source, BSD licence, no API key) as a dark green
+neon city in 3D: buildings rise to their real `height_m` with a glowing roof edge, streets have lit kerbs, and small
+lights move along animal paths, deliveries and people's daily routes. Everything is drawn from the dataset itself,
+so it needs no map tiles and works offline.
+
 How it stays easy to read:
 
-- **One colour per meaning**, and each category also has its own shape or line pattern:
-  blue circles = people, orange pins = animals, brown dots = animal homes, green = nature (the pond is blue),
-  yellow dashed = wildlife quiet zones, red pulsing rings = conflicts, purple = agreed fixes or new things in a plan,
-  grey/white = streets and buildings. People's routes are solid blue lines, animal paths are moving orange dots,
-  delivery routes are moving grey dashes.
-- **Quick views** at the top: Overview (calm first view), People, Animals, Conflicts & fixes, Everything.
-- **Map key** on the left: every category with its symbol, a count and an on/off switch.
-- **Click anything** to open a details card. Clicking an animal fades everything that is not linked to it,
+- **One colour per meaning**, each with its own shape or line pattern: cyan = people, orange pins = animals,
+  amber beacons = animal homes, green = nature (the pond is teal), yellow dashed = quiet zones, red pulsing rings =
+  conflicts, violet = fixes and anything a plan adds, mint = streets and buildings.
+- **Very little text.** Names show on hover, the key is a list of switches, and the details card shows a few facts.
+- **Quick views** at the top: Overview, People, Animals, Conflicts, All. Each view zooms back out to the whole district.
+- **Click anything** to open its card. Clicking an animal fades everything that is not linked to it,
   and shows its home, quiet zone, path and conflicts, even if those layers are switched off.
-- **First visit guide** ("How to read this map"), reopened with the **Help** button.
-- `?solution=<id>` shows a plan from the mediation studio, with a **Today / With the plan** switch.
-  The mediation studio's smaller map has a **Full-screen map** button that opens this.
-- "Real Brussels underneath" adds faint OpenStreetMap tiles (off by default, because the 2126 streets are invented).
+- **First visit guide**, reopened with the help button.
+- `?solution=<id>` shows a plan from the mediation studio, with a **Now / With plan** switch.
+  The mediation studio's smaller map has an **Open map** button that opens this.
+- "Real Brussels" in the key adds faint, inverted OpenStreetMap tiles under the city (off by default, because the 2126 streets are invented).
+- Drag with the right mouse button (or two fingers) to turn and tilt the view; the compass button resets it.
 
-Code: `src/features/map/` (`MapPage`, `NeighborhoodMap`, `MapLegend`, `FeatureDetails`, `MapGuide`,
-`mapStyle.ts` for categories and colours, `markers.ts` for the HTML markers, `mapData.ts` for loading).
+Code: `src/features/map/` (`MapPage`, `NeighborhoodMap` for the MapLibre style and camera, `MapLegend`, `FeatureDetails`,
+`MapGuide`, `mapStyle.ts` for categories and colours, `markers.ts` for the HTML markers, `mapData.ts` for loading).
 
 ## Animal sounds
 
-Clicking an animal on the map plays its call (turn it off with **Sounds on/off** in the top bar). The sounds are
+Clicking an animal on the map plays its call (turn it off with the speaker button in the top bar). The sounds are
 **made in the browser with the Web Audio API** (`src/features/sounds/animalSounds.ts`), one small recipe per species:
-house martin "prrrt" twitters, peregrine "kek-kek-kek", pipistrelle bat-detector ticks and feeding buzz,
+house martin "prrrt" twitters, peregrine "kek kek kek", pipistrelle bat detector ticks and feeding buzz,
 mason bee wing hum, hedgehog sniffs and huffs, fox barks. No audio files, no API key, no licences to track,
-and it works offline. The card under each sound explains what the real animal sounds like and says it is not a recording.
+and it works offline. The card shows one short line on what the real animal sounds like and marks the sound as synthesized.
 
 To use a real recording instead, put the file in `public/sounds/` and add it to `RECORDINGS` in that file
 (check the licence first).

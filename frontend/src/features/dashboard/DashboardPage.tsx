@@ -71,7 +71,7 @@ export default function DashboardPage() {
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#163E36] text-[#E6F3D0] transition-transform group-hover:translate-x-1"><ArrowUpRight size={17} /></span>
               </button>
               <Link to="/map" className="kinship-hero-secondary inline-flex min-h-12 items-center gap-2 px-2 text-sm font-medium">
-                Open the neighborhood map <ArrowUpRight size={18} />
+                Open the map <ArrowUpRight size={18} />
               </Link>
               <a className="kinship-hero-secondary inline-flex min-h-12 items-center gap-2 px-2 text-sm font-medium" href="#how-it-works">
                 Explore the idea <ArrowDownRight size={18} />

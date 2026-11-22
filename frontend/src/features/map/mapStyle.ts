@@ -1,28 +1,29 @@
 import type { MapFeatureProps } from "./mapData";
 
 /**
- * One visual language for the whole map:
- *   blue = people · orange = animals · brown = animal homes · green = nature
- *   yellow = quiet zones · red = conflicts · purple = fixes and plans · grey = the city
- * Every category also has its own shape or line pattern, so colour is never the only clue.
+ * Neon on a dark green city. Each meaning keeps one colour and its own shape or line pattern:
+ *   cyan people · orange animals · amber homes · green nature · teal water
+ *   yellow quiet zones · red conflicts · violet fixes and plans · mint city
  */
 export const COLORS = {
-  people: "#2563EB",
-  animals: "#EA6A1E",
-  home: "#8B5A2B",
-  place: "#475569",
-  delivery: "#475569",
-  conflict: "#DC2626",
-  fix: "#7C3AED",
-  nature: "#3F9A55",
-  natureFill: "#A7D9A9",
-  water: "#9FD0E4",
-  quiet: "#D97706",
-  quietFill: "#FCD34D",
-  street: "#FFFFFF",
-  streetCasing: "#D8D1C1",
-  building: "#E9E3D5",
-  buildingEdge: "#BFB49E",
+  ground: "#03140f",
+  grid: "#0c3326",
+  people: "#4cc9ff",
+  animals: "#ff8a3d",
+  home: "#ffc24b",
+  place: "#9fe8c8",
+  delivery: "#d7e3dd",
+  conflict: "#ff3b5c",
+  fix: "#b388ff",
+  nature: "#39ff88",
+  natureFill: "#0b3d26",
+  water: "#2de2ff",
+  waterFill: "#05303a",
+  quiet: "#ffe14d",
+  street: "#0c2a21",
+  streetLight: "#1fd68a",
+  building: "#0f3a2d",
+  buildingTop: "#3dffb0",
 } as const;
 
 export type CategoryKey =
@@ -45,7 +46,6 @@ export type SwatchKind = "person" | "animal" | "home" | "place" | "entrance" | "
 export interface Category {
   key: CategoryKey;
   label: string;
-  hint: string;
   color: string;
   swatch: SwatchKind;
   /** Line pattern (SVG dash array) for routes and zone outlines. */
@@ -60,41 +60,41 @@ export interface CategoryGroup {
 
 export const CATEGORY_GROUPS: CategoryGroup[] = [
   {
-    title: "Who lives here",
+    title: "Living here",
     categories: [
-      { key: "people", label: "People", hint: "Residents, workers, couriers.", color: COLORS.people, swatch: "person" },
-      { key: "animals", label: "Animals", hint: "Tap one to hear it.", color: COLORS.animals, swatch: "animal" },
-      { key: "homes", label: "Animal homes", hint: "Nests, dens and roosts.", color: COLORS.home, swatch: "home" },
+      { key: "people", label: "People", color: COLORS.people, swatch: "person" },
+      { key: "animals", label: "Animals", color: COLORS.animals, swatch: "animal" },
+      { key: "homes", label: "Animal homes", color: COLORS.home, swatch: "home" },
     ],
   },
   {
-    title: "How they move",
+    title: "Moving",
     categories: [
-      { key: "people_routes", label: "People's daily routes", hint: "Commutes and school runs.", color: COLORS.people, swatch: "line" },
-      { key: "animal_paths", label: "Animal paths", hint: "Where animals fly or crawl.", color: COLORS.animals, swatch: "line", dash: "1 7" },
-      { key: "deliveries", label: "Delivery routes", hint: "Cargo bikes and robots.", color: COLORS.delivery, swatch: "line", dash: "8 6" },
+      { key: "people_routes", label: "People routes", color: COLORS.people, swatch: "line" },
+      { key: "animal_paths", label: "Animal paths", color: COLORS.animals, swatch: "line", dash: "1 6" },
+      { key: "deliveries", label: "Deliveries", color: COLORS.delivery, swatch: "line", dash: "6 5" },
     ],
   },
   {
     title: "Zones",
     categories: [
-      { key: "nature", label: "Nature areas", hint: "Green spaces and the pond.", color: COLORS.nature, fill: COLORS.natureFill, swatch: "zone" },
-      { key: "quiet_zones", label: "Wildlife quiet zones", hint: "Keep away in nesting months.", color: COLORS.quiet, fill: COLORS.quietFill, swatch: "zone", dash: "5 4" },
+      { key: "nature", label: "Nature", color: COLORS.nature, fill: COLORS.natureFill, swatch: "zone" },
+      { key: "quiet_zones", label: "Quiet zones", color: COLORS.quiet, fill: "#3a3410", swatch: "zone", dash: "4 3" },
     ],
   },
   {
-    title: "Problems and fixes",
+    title: "Issues",
     categories: [
-      { key: "conflicts", label: "Conflicts", hint: "A person and an animal clash.", color: COLORS.conflict, swatch: "conflict" },
-      { key: "fixes", label: "Agreed fixes", hint: "Agreed by both sides.", color: COLORS.fix, swatch: "fix" },
+      { key: "conflicts", label: "Conflicts", color: COLORS.conflict, swatch: "conflict" },
+      { key: "fixes", label: "Fixes", color: COLORS.fix, swatch: "fix" },
     ],
   },
   {
-    title: "The city",
+    title: "City",
     categories: [
-      { key: "places", label: "Places", hint: "Tram, playground, solar roofs.", color: COLORS.place, swatch: "place" },
-      { key: "entrances", label: "Building entrances", hint: "Doors and delivery docks.", color: COLORS.place, swatch: "entrance" },
-      { key: "city", label: "Streets and buildings", hint: "The map background.", color: COLORS.buildingEdge, fill: COLORS.building, swatch: "zone" },
+      { key: "places", label: "Places", color: COLORS.place, swatch: "place" },
+      { key: "entrances", label: "Doors", color: COLORS.place, swatch: "entrance" },
+      { key: "city", label: "Streets", color: COLORS.buildingTop, fill: COLORS.building, swatch: "zone" },
     ],
   },
 ];
@@ -140,7 +140,7 @@ export function categoryOf(p: MapFeatureProps): CategoryKey | null {
   }
 }
 
-/** Quick views, so a first-time visitor can look at one story at a time. */
+/** Quick views, so a first visit shows one story at a time. */
 export interface FocusView {
   key: string;
   label: string;
@@ -151,54 +151,53 @@ export const FOCUS_VIEWS: FocusView[] = [
   {
     key: "overview",
     label: "Overview",
-    // Calm first view: who lives where, and where the problems are. Routes come with the other views.
+    // Calm first view: who lives where and where the problems are.
     categories: ["people", "animals", "homes", "people_routes", "nature", "quiet_zones", "conflicts", "fixes", "places", "city"],
   },
   { key: "people", label: "People", categories: ["people", "people_routes", "deliveries", "places", "entrances", "city"] },
   { key: "animals", label: "Animals", categories: ["animals", "homes", "animal_paths", "nature", "quiet_zones", "city"] },
-  { key: "conflicts", label: "Conflicts & fixes", categories: ["conflicts", "fixes", "people", "animals", "quiet_zones", "city"] },
-  { key: "everything", label: "Everything", categories: ALL_CATEGORIES },
+  { key: "conflicts", label: "Conflicts", categories: ["conflicts", "fixes", "people", "animals", "quiet_zones", "city"] },
+  { key: "everything", label: "All", categories: ALL_CATEGORIES },
 ];
 
 const ROLE_WORDS: Record<string, string> = {
   resident: "Resident",
-  owner: "Building owner",
+  owner: "Owner",
   technician: "Technician",
   courier: "Courier",
 };
 
-/** A short, plain description of what a feature is. */
+/** One or two words for what a feature is. */
 export function typeLabel(p: MapFeatureProps): string {
   const species = p.species_name ? ` · ${p.species_name}` : "";
+  const isNew = p.scenario_role === "proposed";
   switch (p.layer) {
     case "resident":
-      return `Person · ${ROLE_WORDS[p.role ?? ""] ?? "Neighbor"}`;
+      return ROLE_WORDS[p.role ?? ""] ?? "Neighbor";
     case "wildlife":
-      return `Animal${species}`;
+      return p.species_name ?? "Animal";
     case "wildlife_site":
-      return `Animal home${species}`;
+      return `Home${species}`;
     case "human_route":
-      return p.kind === "street" ? "Street" : "People's daily route";
+      return p.kind === "street" ? "Street" : "Daily route";
     case "wildlife_corridor":
-      return `Animal path${species}`;
+      return `Path${species}`;
     case "delivery_route":
       return "Delivery route";
     case "habitat_zone":
-      return "Nature area";
+      return p.habitat === "wetland" ? "Pond" : "Nature";
     case "ecological_buffer":
-      return `Wildlife quiet zone${species}`;
+      return `Quiet zone${species}`;
     case "conflict_hotspot":
       return `Conflict${species}`;
     case "intervention":
-      return p.scenario_role === "proposed" ? "Proposed fix" : "Agreed fix";
     case "barrier":
-      return p.scenario_role === "proposed" ? "Proposed screen or barrier" : "Agreed screen or barrier";
     case "agreed_zone":
-      return "Agreed coexistence zone";
+      return isNew ? "New fix" : "Agreed fix";
     case "point_of_interest":
       return "Place";
     case "entrance":
-      return "Building entrance";
+      return "Door";
     case "building":
       return "Building";
     default:

@@ -88,7 +88,7 @@ export async function loadNeighborhood(useBackend: boolean, solutionId: string |
   return { today: await loadSnapshot(), plan: null, planTitle: null, source: "offline" };
 }
 
-// --- geometry helpers (GeoJSON is [lon, lat], Leaflet is [lat, lon]) ----------------
+// --- geometry helpers (GeoJSON is [lon, lat]; these return [lat, lon]) ----------------
 
 export type LatLng = [number, number];
 
@@ -132,18 +132,11 @@ export function boundsOf(features: MapFeature[]): [LatLng, LatLng] | null {
   ];
 }
 
-/** Moves a polygon a few metres (used to draw soft building shadows). */
-export function shiftRings(rings: LatLng[][], metresEast: number, metresNorth: number): LatLng[][] {
-  return rings.map((r) =>
-    r.map(([lat, lon]) => [lat + metresNorth / 111_320, lon + metresEast / (111_320 * Math.cos((lat * Math.PI) / 180))] as LatLng)
-  );
-}
-
 // --- plain-language text ----------------------------------------------------------
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-/** [5,6,7,8,11,12,1,2,3] -> "Nov–Mar, May–Aug" */
+/** [5,6,7,8,11,12,1,2,3] -> "Nov to Mar, May to Aug" */
 export function monthRanges(months: number[] | null | undefined): string {
   if (!months?.length) return "all year";
   const on = Array.from({ length: 12 }, (_, i) => months.includes(i + 1));
@@ -155,7 +148,7 @@ export function monthRanges(months: number[] | null | undefined): string {
     if (on[i] && !on[(i + 11) % 12]) {
       let end = i;
       while (on[(end + 1) % 12] && (end + 1) % 12 !== i) end = (end + 1) % 12;
-      ranges.push(end === i ? MONTHS[i] : `${MONTHS[i]}–${MONTHS[end]}`);
+      ranges.push(end === i ? MONTHS[i] : `${MONTHS[i]} to ${MONTHS[end]}`);
     }
   }
   return ranges.join(", ");
@@ -163,4 +156,13 @@ export function monthRanges(months: number[] | null | undefined): string {
 
 export function escapeHtml(value: unknown): string {
   return String(value ?? "").replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+}
+
+/** Display names without hyphens or dashes ("Cargo-bike route" becomes "Cargo bike route"). */
+export function tidy(name: string | null | undefined): string {
+  return String(name ?? "")
+    .replace(/\bCo-op\b/g, "Coop")
+    .replace(/\s*[–—]\s*/g, ", ")
+    .replace(/(\d)\s*-\s*(\d)/g, "$1 to $2")
+    .replace(/(\p{L})-(\p{L})/gu, "$1 $2");
 }
