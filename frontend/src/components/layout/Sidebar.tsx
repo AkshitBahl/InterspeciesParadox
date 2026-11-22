@@ -15,7 +15,7 @@ import {
 
 const navigation = [
   { label: "Overview", path: "/dashboard", icon: LayoutDashboard, number: "01" },
-  { label: "Neighborhood map", path: "/map", icon: MapPinned, number: "02" },
+  { label: "Map", path: "/map", icon: MapPinned, number: "02" },
   { label: "My profile", path: "/profile", icon: UserRound, number: "03" },
   { label: "Report conflict", path: "/conflict/new", icon: FilePlus2, number: "04" },
   { label: "Needs assessment", path: "/conflict/demo/assessment", icon: Scale, number: "05", section: "assessment" },

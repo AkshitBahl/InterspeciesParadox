@@ -29,11 +29,11 @@ export default function Swatch({ category, emoji }: { category: Category; emoji?
       const dotted = category.dash?.startsWith("1 ");
       return (
         <svg className="kin-swatch-svg" viewBox="0 0 36 14" aria-hidden="true">
-          {!category.dash && <path d="M2 7 H34" stroke="#fff" strokeWidth="7" strokeLinecap="round" />}
+          <path d="M3 7 H33" stroke={category.color} strokeWidth="7" strokeLinecap="round" opacity="0.25" />
           <path
-            d="M2 7 H34"
+            d="M3 7 H33"
             stroke={category.color}
-            strokeWidth={dotted ? 4.5 : category.dash ? 3 : 4}
+            strokeWidth={dotted ? 4 : category.dash ? 2.4 : 3}
             strokeDasharray={category.dash}
             strokeLinecap={dotted || !category.dash ? "round" : "butt"}
             fill="none"
@@ -45,9 +45,9 @@ export default function Swatch({ category, emoji }: { category: Category; emoji?
       if (category.key === "city") {
         return (
           <svg className="kin-swatch-svg" viewBox="0 0 36 18" aria-hidden="true">
-            <path d="M0 13 H36" stroke={COLORS.streetCasing} strokeWidth="7" />
-            <path d="M0 13 H36" stroke={COLORS.street} strokeWidth="4.5" />
-            <rect x="9" y="1.5" width="15" height="9" rx="1.5" fill={COLORS.building} stroke={COLORS.buildingEdge} />
+            <path d="M0 14 H36" stroke={COLORS.street} strokeWidth="6" />
+            <path d="M0 11 H36 M0 17 H36" stroke={COLORS.streetLight} strokeWidth="0.8" opacity="0.6" />
+            <rect x="10" y="1.5" width="14" height="8" rx="1.5" fill={COLORS.building} stroke={COLORS.buildingTop} strokeWidth="1" />
           </svg>
         );
       }
@@ -59,10 +59,10 @@ export default function Swatch({ category, emoji }: { category: Category; emoji?
             width="32"
             height="14"
             rx={category.dash ? 7 : 4}
-            fill={category.fill}
-            fillOpacity={category.dash ? 0.45 : 0.7}
+            fill={category.dash ? category.color : category.fill}
+            fillOpacity={category.dash ? 0.12 : 0.95}
             stroke={category.color}
-            strokeWidth="1.8"
+            strokeWidth="1.6"
             strokeDasharray={category.dash}
           />
         </svg>

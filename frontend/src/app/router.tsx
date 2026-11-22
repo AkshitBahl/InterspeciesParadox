@@ -21,7 +21,7 @@ import LiveAgreementPage from "../features/live/LiveAgreementPage";
 // (The router file is not hot-reloaded as a component, so this lint rule doesn't apply.)
 // eslint-disable-next-line react-refresh/only-export-components
 const IntroPage = lazy(() => import("../features/intro/IntroPage"));
-// The full-page neighborhood map, also lazy so Leaflet loads only when it is needed.
+// The full page neighborhood map, also lazy so MapLibre loads only when it is needed.
 // eslint-disable-next-line react-refresh/only-export-components
 const MapPage = lazy(() => import("../features/map/MapPage"));
 

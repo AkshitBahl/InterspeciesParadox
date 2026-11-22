@@ -13,41 +13,23 @@
 export const RECORDINGS: Partial<Record<string, string>> = {};
 
 export interface AnimalSoundInfo {
-  /** What the sound is, in one plain sentence (biology, not personality). */
+  /** What the real animal sounds like, in a few words. */
   description: string;
-  /** Button text, e.g. "Hear the fox". */
+  /** Button text. */
   action: string;
 }
 
 export const SOUND_INFO: Record<string, AnimalSoundInfo> = {
-  "house-martin": {
-    action: "Hear the house martins",
-    description: "A dry, rolling \"prrrt\" twitter that house martins give in flight around their colony.",
-  },
-  "peregrine-falcon": {
-    action: "Hear the peregrines",
-    description: "A harsh, fast \"kek-kek-kek\" alarm call, given when something comes too close to the nest ledge.",
-  },
-  "common-pipistrelle": {
-    action: "Hear the bats",
-    description: "Their real calls are too high for human ears. This is what a bat detector makes of them: quick ticks that speed up into a \"feeding buzz\" when a bat catches an insect.",
-  },
-  "red-mason-bee": {
-    action: "Hear the bee",
-    description: "Mason bees have no voice. You hear the hum of wings beating hundreds of times a second as she flies past.",
-  },
-  "european-hedgehog": {
-    action: "Hear the hedgehog",
-    description: "Hedgehogs snuffle and sniff loudly while they forage, and huff and snort when they are disturbed.",
-  },
-  "red-fox": {
-    action: "Hear the foxes",
-    description: "Short, sharp barks, often in a series. Foxes bark most in winter, when they also scream to find a mate.",
-  },
+  "house-martin": { action: "Play", description: "A dry, rolling twitter in flight." },
+  "peregrine-falcon": { action: "Play", description: "A harsh kek kek kek near the nest." },
+  "common-pipistrelle": { action: "Play", description: "Too high for us. This is a bat detector." },
+  "red-mason-bee": { action: "Play", description: "No voice, just a wing hum." },
+  "european-hedgehog": { action: "Play", description: "Sniffs, snuffles and huffs." },
+  "red-fox": { action: "Play", description: "Short, sharp barks." },
 };
 
 export function soundInfo(slug: string | null | undefined): AnimalSoundInfo {
-  return (slug && SOUND_INFO[slug]) || { action: "Hear this animal", description: "A short call, made in your browser." };
+  return (slug && SOUND_INFO[slug]) || { action: "Play", description: "A short call." };
 }
 
 // --- tiny synth toolkit -------------------------------------------------------------
