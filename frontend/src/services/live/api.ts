@@ -8,7 +8,6 @@ import type {
   LiveConflict,
   MapLocation,
   Negotiation,
-  NegotiationMessage,
   ParameterSpec,
   ProfilePatch,
   ScenarioCollection,
@@ -23,8 +22,6 @@ export const liveApi = {
   listSpecies: () => liveRequest<SpeciesSummary[]>("/species"),
   getSpecies: (slug: string) => liveRequest<SpeciesDetail>(`/species/${slug}`),
   introduction: (slug: string) => liveRequest<Statement>(`/species/${slug}/representative`),
-  ask: (slug: string, question: string) =>
-    liveRequest<Statement>(`/species/${slug}/representative/ask`, { method: "POST", body: { question } }),
 
   locations: () => liveRequest<MapLocation[]>("/map/locations"),
   /** Each species' home on the demo map (den, nest, roost...). */
@@ -49,8 +46,6 @@ export const liveApi = {
   getNegotiation: (id: string) => liveRequest<Negotiation>(`/conflicts/${id}/negotiation`),
   openNegotiation: (id: string, solutionId: string) =>
     liveRequest<Negotiation>(`/conflicts/${id}/negotiation`, { method: "POST", body: { solution_id: solutionId } }),
-  sendMessage: (id: string, message: string) =>
-    liveRequest<NegotiationMessage[]>(`/conflicts/${id}/negotiation/messages`, { method: "POST", body: { message } }),
   counterProposal: (id: string, solutionId: string, changes: Record<string, unknown>, message?: string) =>
     liveRequest<CounterProposalResult>(`/conflicts/${id}/negotiation/counter-proposals`, {
       method: "POST",

@@ -98,7 +98,7 @@ export default function LiveMediationPage() {
     <div className="space-y-9">
       <header>
         <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-sage/40 px-4 py-2 text-xs font-bold text-forest">
-          <HeartHandshake size={15} /> STEP 03 — MEDIATION STUDIO
+          <HeartHandshake size={15} /> STEP 03 · MEDIATION STUDIO
         </div>
         <h1 className="text-4xl font-bold tracking-tight text-forest sm:text-5xl">
           Find a little <span className="text-leaf">common ground.</span>
@@ -138,7 +138,7 @@ export default function LiveMediationPage() {
         ) : list.length === 0 ? (
           <EmptyState title="No plans yet" description="The mediator couldn't find a plan that beats doing nothing. Try changing the report or your profile." />
         ) : (
-          <div className="grid gap-5 xl:grid-cols-3">
+          <div className="plan-grid grid items-start gap-5 md:grid-cols-2 xl:grid-cols-3">
             {list.map((solution) => (
               <LivePlanCard
                 key={solution.id}

@@ -25,10 +25,10 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
         <button type="button" onClick={onMenuClick} aria-label="Open navigation" aria-controls="primary-navigation" className="kinship-menu-button rounded-xl p-2 lg:hidden">
           <Menu size={23} />
         </button>
-        <div className="hidden h-[28px] w-px bg-[#bbcbc0] sm:block" aria-hidden="true" />
+        <div className="hidden h-[28px] w-px bg-white/10 sm:block" aria-hidden="true" />
         <div className="min-w-0">
           <p className="kinship-eyebrow text-[9px] font-semibold uppercase tracking-[0.23em]">Your neighborhood / 2126</p>
-          <p className="truncate text-[13px] font-medium tracking-[-0.02em] text-[#24483c]">{pageTitle}</p>
+          <p className="truncate text-[13px] font-medium tracking-[-0.02em] text-forest">{pageTitle}</p>
         </div>
       </div>
       <div className="flex items-center gap-2 sm:gap-4">

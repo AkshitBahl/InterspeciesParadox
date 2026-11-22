@@ -87,7 +87,7 @@ export default function MediationPage() {
   return (
     <div className="space-y-9">
       <header>
-        <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-sage/40 px-4 py-2 text-xs font-bold text-forest"><HeartHandshake size={15} /> STEP 03 — MEDIATION STUDIO</div>
+        <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-sage/40 px-4 py-2 text-xs font-bold text-forest"><HeartHandshake size={15} /> STEP 03 · MEDIATION STUDIO</div>
         <h1 className="text-4xl font-bold tracking-tight text-forest sm:text-5xl">Find a little <span className="text-leaf">common ground.</span></h1>
         <p className="mt-4 max-w-3xl leading-relaxed text-ink/65">Review three possible arrangements, compare how they support human and wildlife needs, then request changes to the plan you prefer.</p>
         <p className="mt-2 text-xs text-ink/50">Based on: <strong>{conflict.title}</strong> · {assessment.humanNeeds.length} human needs · {assessment.wildlifeNeeds.length} wildlife needs</p>
@@ -95,7 +95,7 @@ export default function MediationPage() {
 
       <section>
         <h2 className="mb-4 text-2xl font-bold text-forest">01 / Explore proposed plans</h2>
-        <div className="grid gap-5 xl:grid-cols-3">
+        <div className="plan-grid grid items-start gap-5 md:grid-cols-2 xl:grid-cols-3">
           {results.map((result) => <PlanCard key={result.plan.id} result={result} selected={result.plan.id === selected.plan.id} onSelect={() => { setSelectedId(result.plan.id); setError(""); }} />)}
         </div>
         {!selected.eligible && firstEligible && (

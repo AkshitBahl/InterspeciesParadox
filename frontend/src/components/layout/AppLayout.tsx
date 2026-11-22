@@ -1,19 +1,34 @@
-import { useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 import JourneyProgress from "./JourneyProgress";
+import DepthBackdrop from "../../motion/DepthBackdrop";
+import { ScrollTrigger } from "../../motion/gsap";
+import { useReducedMotion } from "../../motion/reducedMotion";
+import { jumpToTop, startSmoothScroll } from "../../motion/smoothScroll";
 import "../../styles/experience.css";
 
-/** The real app is unchanged; /dashboard is its home after / becomes the prologue. */
+/** The app shell: a neon 3D backdrop, smooth scrolling, the rail, the top bar and the page. */
 export default function AppLayout() {
   const { pathname } = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isDashboard = pathname === "/dashboard";
+  const reduced = useReducedMotion();
+
+  // Smooth, eased scrolling for every app page (native scrolling with reduced motion).
+  useEffect(() => (reduced ? undefined : startSmoothScroll()), [reduced]);
+
+  // A new page starts at the top, and scroll animations re-measure once it has rendered.
+  useLayoutEffect(() => {
+    jumpToTop();
+    const id = requestAnimationFrame(() => ScrollTrigger.refresh());
+    return () => cancelAnimationFrame(id);
+  }, [pathname]);
 
   return (
     <div className="kinship-shell route-fade min-h-screen lg:flex">
-      <div className="kinship-atmosphere" aria-hidden="true" />
+      <DepthBackdrop />
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="kinship-app-column relative flex min-w-0 flex-1 flex-col">

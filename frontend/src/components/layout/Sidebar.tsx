@@ -42,6 +42,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       )}
       <aside
         id="primary-navigation"
+        data-lenis-prevent
         className={`kinship-sidebar fixed inset-y-0 left-0 z-50 flex w-[278px] shrink-0 flex-col overflow-y-auto px-6 pb-6 pt-7 transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div className="mb-11 flex items-start justify-between">

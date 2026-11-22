@@ -1,196 +1,282 @@
 /*
-  KINSHIP / 2126 — cinematic eco-futurist visual system
-  Original design. Scoped to the visual shell and opt-in class names.
-  No changes to routing, forms, evaluation, or API behavior.
-*/
-:root {
-  --kinship-deep: #0c3028;
-  --kinship-ink: #163d31;
-  --kinship-moss: #4a8165;
-  --kinship-muted: #667c70;
-  --kinship-acid: #d9eab9;
-  --kinship-canvas: #f0f3eb;
-}
+  KINSHIP / 2126: the neon solarpunk shell for every app page.
 
-html { scroll-behavior: smooth; }
+  The app pages use Tailwind colour names (forest, ink, leaf, sage, peach). Inside the shell we
+  point those names at the neon palette of the map, so every existing page turns dark and glowing
+  without touching its logic. A few utilities that meant "white card" get a dark glass instead.
+*/
+
 .kinship-shell {
+  --neo-ground: #03140f;
+  --neo-deep: #020d0a;
+  --neo-glass: rgba(7, 31, 24, 0.8);
+  --neo-glass-soft: rgba(220, 255, 240, 0.045);
+  --neo-line: rgba(61, 255, 176, 0.14);
+  --neo-line-strong: rgba(61, 255, 176, 0.34);
+  --neo-text: #dcfff0;
+  --neo-muted: #84b9a3;
+  --neo-faint: #4f7d6a;
+  --neo-mint: #3dffb0;
+  --neo-people: #4cc9ff;
+  --neo-animals: #ff8a3d;
+  --neo-home: #ffc24b;
+  --neo-conflict: #ff3b5c;
+  --neo-fix: #b388ff;
+
+  /* Tailwind colour names, re-pointed for the dark theme. */
+  --color-forest: #dcfff0;
+  --color-ink: #c6e6d7;
+  --color-leaf: #3dffb0;
+  --color-sage: #4fd49b;
+  --color-peach: #ff8a3d;
+  --color-red-50: #2b0c14;
+  --color-red-300: #8c2c40;
+  --color-red-600: #ff6b84;
+  --color-red-700: #ff7d93;
+  --color-red-800: #ff9aab;
+  --color-amber-50: #261d08;
+  --color-amber-100: #2e230a;
+  --color-amber-300: #8f6c1d;
+  --color-amber-400: #d29c2e;
+  --color-amber-800: #ffd27a;
+  --color-amber-900: #ffdd94;
+
   position: relative;
   isolation: isolate;
-  background: #eff2e9;
-  color: var(--kinship-ink);
+  color-scheme: dark;
+  background: var(--neo-deep);
+  color: var(--neo-text);
   font-family: "Inter", "Avenir Next", ui-sans-serif, system-ui, sans-serif;
 }
-.kinship-atmosphere {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: radial-gradient(ellipse at 88% 8%, rgba(189, 218, 180, .25), transparent 40%),
-    radial-gradient(ellipse at 13% 82%, rgba(221, 230, 190, .25), transparent 40%),
-    linear-gradient(140deg, #f4f5ec 0%, #ecf2e8 100%);
-}
-.kinship-atmosphere::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  opacity: .16;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.17'/%3E%3C/svg%3E");
-}
+
+/* Rubber band scrolling on a Mac shows the page behind: keep it dark too. */
+:root:has(.kinship-shell) { background: #020d0a; }
+html:has(.kinship-shell) { scroll-behavior: auto; }
+
+.kinship-shell ::selection { background: rgba(61, 255, 176, 0.3); color: #fff; }
+
 .kinship-app-column { min-height: 100vh; }
 .kinship-main { position: relative; }
 .kinship-main-inner { max-width: 1260px; }
-.kinship-footer { color: #7c9284; }
+.kinship-footer { color: var(--neo-faint); }
 
-/* Navigation: a museum-like dark botanical rail */
+/* ---------- the 3D backdrop (see motion/DepthBackdrop.tsx) ---------- */
+.depth-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+.depth-backdrop > * { position: absolute; will-change: transform; }
+
+.depth-sky {
+  inset: 0;
+  will-change: auto;
+  background:
+    radial-gradient(90% 60% at 50% 115%, rgba(61, 255, 176, 0.13), transparent 60%),
+    radial-gradient(70% 50% at 85% 0%, rgba(76, 201, 255, 0.07), transparent 60%),
+    linear-gradient(180deg, #020c09 0%, #03140f 55%, #041a13 100%);
+}
+
+.depth-orb { border-radius: 50%; }
+.depth-orb-far { width: 70vmax; height: 70vmax; left: -22vmax; top: -18vmax; background: radial-gradient(circle, rgba(61, 255, 176, 0.09), transparent 62%); }
+.depth-orb-mid { width: 46vmax; height: 46vmax; right: -14vmax; top: 30vh; background: radial-gradient(circle, rgba(76, 201, 255, 0.07), transparent 62%); }
+.depth-orb-near { width: 34vmax; height: 34vmax; left: 30vw; top: 70vh; background: radial-gradient(circle, rgba(179, 136, 255, 0.06), transparent 62%); }
+
+/* A glowing grid floor in perspective at the bottom of the screen. */
+.depth-floor {
+  left: -40vw;
+  right: -40vw;
+  bottom: 0;
+  height: 46vh;
+  perspective: 420px;
+  perspective-origin: 50% 0%;
+  will-change: auto;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 55%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 55%);
+  opacity: 0.55;
+}
+
+.depth-floor-plane {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -12%;
+  height: 360%;
+  transform-origin: 50% 100%;
+  transform: rotateX(76deg);
+  background-image:
+    linear-gradient(rgba(61, 255, 176, 0.34) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(61, 255, 176, 0.22) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+/* Floating spores at three depths. Each layer is a repeating dot pattern. */
+.depth-dust { left: 0; right: 0; top: 0; height: calc(100% + 440px); }
+.depth-dust-far { opacity: 0.45; background-image: radial-gradient(circle at 30% 40%, rgba(158, 255, 214, 0.9) 0 1px, transparent 1.6px), radial-gradient(circle at 80% 70%, rgba(76, 201, 255, 0.8) 0 1px, transparent 1.6px); background-size: 220px 220px; }
+.depth-dust-mid { opacity: 0.5; background-image: radial-gradient(circle at 60% 20%, rgba(61, 255, 176, 0.9) 0 1.4px, transparent 2.2px), radial-gradient(circle at 15% 85%, rgba(220, 255, 240, 0.7) 0 1.2px, transparent 2px); background-size: 300px 300px; }
+.depth-dust-near { opacity: 0.55; filter: blur(1px); background-image: radial-gradient(circle at 70% 60%, rgba(61, 255, 176, 0.85) 0 2.4px, transparent 3.6px); background-size: 420px 420px; }
+
+/* Big soft leaves in the foreground drift past fastest, like foliage near the camera. */
+.depth-leaf { top: 100%; color: rgba(61, 255, 176, 0.05); filter: blur(2.5px); }
+.depth-leaf-shape { display: block; width: 100%; height: 100%; }
+.depth-leaf-left { left: -70px; width: 240px; height: 380px; rotate: 24deg; }
+.depth-leaf-right { right: -90px; width: 320px; height: 500px; rotate: -32deg; color: rgba(61, 255, 176, 0.04); filter: blur(6px); }
+
+.depth-vignette {
+  inset: 0;
+  will-change: auto;
+  background: radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(1, 8, 6, 0.75) 100%);
+}
+
+/* ---------- navigation rail ---------- */
 .kinship-sidebar {
-  color: #e5eedf;
-  background: linear-gradient(160deg, #153f35 0%, #102f28 57%, #09231f 100%);
-  box-shadow: 2px 0 30px rgba(10, 43, 35, .10);
+  color: var(--neo-text);
+  background: linear-gradient(180deg, rgba(3, 20, 15, 0.94), rgba(2, 12, 9, 0.97));
+  border-right: 1px solid var(--neo-line);
+  box-shadow: 18px 0 50px -30px rgba(0, 0, 0, 0.9);
 }
+
 .kinship-sidebar::before {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(circle at -30% 12%, rgba(167, 206, 153, .11), transparent 48%);
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at -20% 8%, rgba(61, 255, 176, 0.12), transparent 45%);
 }
-.kinship-mark { background: #d6ebbd; color: #143e34; }
-.kinship-mark-dot { position: absolute; top: 9px; right: 8px; width: 5px; height: 5px; border-radius: 50%; background: #75a77a; }
-.kinship-brand { font-size: 29px; line-height: 1; color: #f3f6e7; }
-.kinship-brand-dot { color: #d4ebae; }
-.kinship-sidebar-rule { height: 1px; background: linear-gradient(90deg, rgba(224,239,216,.32), rgba(224,239,216,.04)); }
-.kinship-nav-link { color: #b1c9b9; border: 1px solid transparent; position: relative; }
-.kinship-nav-link:hover { color: #eff7e8; background: rgba(232, 246, 222, .075); }
-.kinship-nav-link.kinship-nav-active { background: rgba(217, 237, 199, .13); border-color: rgba(217, 237, 199, .15); color: #f7ffed; }
-.kinship-nav-number { color: #779e85; width: 17px; }
-.kinship-nav-active .kinship-nav-number { color: #d7eab6; }
-.kinship-nav-current { width: 5px; height: 5px; border-radius: 50%; background: #ddf2b7; box-shadow: 0 0 12px #ddf2b7; }
-.kinship-sidebar-note { border: 1px solid rgba(217, 237, 199, .19); background: linear-gradient(145deg, rgba(145,184,139,.16), rgba(199,231,171,.04)); }
-.kinship-sidebar-note-orbit { position: absolute; width: 185px; height: 185px; border: 1px solid rgba(221,243,192,.18); border-radius: 50%; right: -73px; top: -65px; }
-.kinship-sidebar-note-orbit::after { content:""; position:absolute; inset:25px; border-radius:50%; border:1px solid rgba(221,243,192,.1); }
 
+.kinship-mark {
+  background: rgba(61, 255, 176, 0.1);
+  color: var(--neo-mint);
+  border: 1px solid var(--neo-line-strong);
+  box-shadow: 0 0 22px -4px rgba(61, 255, 176, 0.55);
+}
+
+.kinship-mark-dot { position: absolute; top: 8px; right: 8px; width: 5px; height: 5px; border-radius: 50%; background: var(--neo-mint); box-shadow: 0 0 8px var(--neo-mint); }
+.kinship-brand { font-size: 29px; line-height: 1; color: var(--neo-text); }
+.kinship-brand-dot { color: var(--neo-mint); }
+.kinship-sidebar-rule { height: 1px; background: linear-gradient(90deg, rgba(61, 255, 176, 0.35), rgba(61, 255, 176, 0.02)); }
+.kinship-nav-link { color: var(--neo-muted); border: 1px solid transparent; position: relative; }
+.kinship-nav-link:hover { color: var(--neo-text); background: rgba(61, 255, 176, 0.06); }
+.kinship-nav-link.kinship-nav-active { background: rgba(61, 255, 176, 0.1); border-color: rgba(61, 255, 176, 0.25); color: var(--neo-mint); box-shadow: 0 0 24px -12px rgba(61, 255, 176, 0.8); }
+.kinship-nav-number { color: var(--neo-faint); width: 17px; font-variant-numeric: tabular-nums; }
+.kinship-nav-active .kinship-nav-number { color: var(--neo-mint); }
+.kinship-nav-current { width: 6px; height: 6px; border-radius: 50%; background: var(--neo-mint); box-shadow: 0 0 12px var(--neo-mint); }
+.kinship-sidebar-note { border: 1px solid var(--neo-line); background: linear-gradient(150deg, rgba(61, 255, 176, 0.1), rgba(61, 255, 176, 0.02)); }
+.kinship-sidebar-note-orbit { position: absolute; width: 185px; height: 185px; border: 1px solid rgba(61, 255, 176, 0.22); border-radius: 50%; right: -73px; top: -65px; }
+.kinship-sidebar-note-orbit::after { content: ""; position: absolute; inset: 25px; border-radius: 50%; border: 1px solid rgba(61, 255, 176, 0.12); }
+
+/* ---------- top bar ---------- */
 .kinship-navbar {
-  background: rgba(245,247,239,.74);
-  border-bottom: 1px solid rgba(102, 135, 115, .19);
-  backdrop-filter: blur(14px);
+  background: rgba(3, 18, 13, 0.62);
+  border-bottom: 1px solid var(--neo-line);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  backdrop-filter: blur(14px) saturate(1.3);
 }
-.kinship-eyebrow { color: #678b74; }
-.kinship-signal { color: #4e735c; background: rgba(210, 226, 205, .48); }
-.kinship-signal svg { color: #4d9c71; }
-.kinship-new-case { background: #133d32; color: #eff9e9; transition: background .25s, transform .25s; }
-.kinship-new-case:hover { background: #2e7355; transform: translateY(-1px); }
-.kinship-menu-button { color: #173f35; background: rgba(207,227,200,.5); }
 
-/* Editorial hero: atmospheric visual with an original illustrated city */
-.kinship-hero {
-  background: #0e332b;
-  box-shadow: 0 35px 75px -38px rgba(17,57,41,.42), 0 8px 30px rgba(22,59,43,.08);
-}
-.kinship-hero::after { content:""; position:absolute; inset:0; pointer-events:none; border:1px solid rgba(221,239,203,.22); border-radius:inherit; }
-.kinship-scene-svg { min-width: 900px; object-fit: cover; opacity: .98; }
-.kinship-scene { opacity: .95; }
-.kinship-hero-vignette {
-  background: linear-gradient(90deg, rgba(6,30,26,.98) 0%, rgba(7,32,27,.97) 19%, rgba(9,36,30,.81) 39%, rgba(8,34,29,.10) 75%),
-    linear-gradient(0deg, rgba(6,28,24,.62) 0%, transparent 25%, rgba(6,28,24,.15) 100%);
-}
-.kinship-hero-content { isolation: isolate; }
-.kinship-hero-chip { border: 1px solid rgba(217,234,188,.28); background: rgba(224,241,208,.09); color:#e5f3d8; backdrop-filter: blur(8px); }
-.kinship-spark { width:7px; height:7px; border-radius:50%; background:#d9edb2; box-shadow:0 0 18px rgba(223,252,170,.75); }
-.kinship-hero-copy { transform: translateZ(0); }
-.kinship-display-title {
-  font-family: "Arial Narrow", "Avenir Next Condensed", "Inter", ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(4rem, 7.1vw, 7.5rem);
-  line-height: .91;
-  font-weight: 650;
-  letter-spacing: -.085em;
-  text-wrap: balance;
-}
-.kinship-display-title em { font-family: Georgia, "Iowan Old Style", serif; color:#d4e6af; font-weight: 400; letter-spacing: -.065em; }
-.kinship-title-underline { position:relative; display:inline-block; padding-right:.12em; }
-.kinship-title-underline::after { content: ""; position:absolute; left:.03em; right:.01em; bottom:-.08em; height: 3px; background:#b3cf9c; transform:rotate(-1deg); border-radius:100%; }
-.kinship-hero-cta { background: #e3efc5; color: #163a30; box-shadow:0 12px 28px rgba(0,0,0,.16); transition: transform .28s, background .28s, box-shadow .28s; }
-.kinship-hero-cta:hover { background:#f0f6dc; transform:translateY(-3px); box-shadow:0 16px 31px rgba(0,0,0,.24); }
-.kinship-hero-secondary { color:#e0ecca; transition:color .2s; }
-.kinship-hero-secondary:hover { color:#fff; }
-.kinship-hero-bottom { color:#d1e1cd; }
-.kinship-hero-avatar { display:grid; place-items:center; height:34px; width:34px; border:2px solid #1c483c; border-radius:50%; background:#c2d6bb; font-size:17px; }
-.kinship-scene-coordinate { position:absolute; padding:8px 11px; border:1px solid rgba(231,246,217,.21); background:rgba(11,49,37,.35); backdrop-filter:blur(10px); color:rgba(240,250,222,.76); font-size:9px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; white-space:nowrap; }
-.kinship-scene-coordinate-point { display:inline-block; width:5px; height:5px; margin-right:8px; background:#e8f5be; border-radius:50%; box-shadow:0 0 9px #d4efac; }
-.kinship-scene-coordinate-one { top:21%; right:7%; }
-.kinship-scene-coordinate-two { bottom:29%; right:21%; }
-.kinship-scene-bottom-label { position:absolute; bottom:13%; right:6%; display:flex; gap:15px; color:#e2ebd7; font-size:9px; letter-spacing:.17em; opacity:.6; text-transform:uppercase; }
-.kinship-bird-one { animation: kinship-bird-flight 7s ease-in-out infinite; }
-.kinship-bird-two { animation: kinship-bird-flight 10s ease-in-out infinite reverse; }
-.kinship-pollen { animation: kinship-pollen-float 4s ease-in-out infinite; }
-@keyframes kinship-bird-flight { 0%,100% { transform:translate(0,0); } 50% { transform:translate(30px,-11px); } }
-@keyframes kinship-pollen-float { 0%,100% { transform:translateY(0); opacity:.75; } 50% { transform:translateY(-25px); opacity:1; } }
+.kinship-eyebrow { color: var(--neo-mint); opacity: 0.8; }
+.kinship-signal { color: var(--neo-mint); background: rgba(61, 255, 176, 0.07); border: 1px solid var(--neo-line); }
+.kinship-signal svg { color: var(--neo-mint); }
+.kinship-new-case { background: var(--neo-mint); color: #03140f; box-shadow: 0 0 24px -6px rgba(61, 255, 176, 0.7); transition: background 0.25s, transform 0.25s, box-shadow 0.25s; }
+.kinship-new-case:hover { background: #8dffd0; transform: translateY(-1px); box-shadow: 0 0 32px -4px rgba(61, 255, 176, 0.9); }
+.kinship-menu-button { color: var(--neo-mint); background: rgba(61, 255, 176, 0.08); border: 1px solid var(--neo-line); }
 
-/* Narrative sections */
-.kinship-editorial-heading {
-  font-family: "Arial Narrow", "Avenir Next Condensed", "Inter", ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(2.3rem, 4vw, 4.65rem);
-  font-weight: 610;
-  line-height: 1.06;
-  letter-spacing: -.067em;
+/* ---------- cards, buttons, fields on every app page ---------- */
+.kinship-shell :is(.bg-white, .bg-white\/85, .bg-white\/80, .bg-white\/70, .bg-white\/60) {
+  background-color: var(--neo-glass);
 }
-.kinship-editorial-heading em { color: #57886b; font-family: Georgia, "Iowan Old Style", serif; font-weight: 400; letter-spacing: -.052em; }
-.kinship-section-kicker { color:#6d957a; }
-.kinship-text-link { color:#2b5c47; border-bottom:1px solid #9bb9a7; padding-bottom:7px; }
-.kinship-text-link:hover { color:#568c66; }
-.kinship-journey-card { transition:transform .35s ease, box-shadow .35s ease; }
-.kinship-journey-card:hover { transform:translateY(-6px); box-shadow:0 18px 35px -28px #224a35; }
-.kinship-journey-card-1 { background:#dde8d5; color:#204e3f; }
-.kinship-journey-card-2 { background:#dfdfce; color:#314d3f; }
-.kinship-journey-card-3 { background:#214b3d; color:#f2f4e7; }
-.kinship-card-number { font-family: Georgia, serif; font-style:italic; opacity:.38; }
-.kinship-card-icon { border:1px solid currentColor; opacity:.8; }
-.kinship-neighbor-note { background:#173e32; }
-.kinship-note-glow { position:absolute; right:6%; top:-170px; width:430px; height:430px; border:1px solid rgba(214,235,181,.15); border-radius:50%; box-shadow:0 0 0 65px rgba(215,242,175,.035),0 0 0 130px rgba(215,242,175,.025); }
-.kinship-note-link { background:#d9eab9; color:#173c30; transition:transform .3s; }
-.kinship-note-link:hover { transform:translateY(-3px); }
 
-/* A calmer but more tactile visual treatment for ALL existing functional pages. */
-.kinship-main-inner > .page-enter > div > section:first-child { position:relative; }
-.kinship-main-inner h1 { letter-spacing:-.055em; }
-.kinship-main-inner h2 { letter-spacing:-.035em; }
-.kinship-card { border-color:rgba(85,124,95,.15); background:rgba(255,255,250,.88); box-shadow:0 14px 40px -35px rgba(15,56,36,.42),0 1px 0 rgba(255,255,255,.85) inset; }
-.kinship-main-inner .kinship-card { border-radius:24px; }
-.kinship-button { min-height:43px; transition:transform .24s, box-shadow .24s, background-color .24s; }
-.kinship-button:not(:disabled):hover { transform:translateY(-2px); box-shadow:0 12px 24px -14px rgba(23,69,47,.42); }
-.kinship-main input:not([type="range"]):not([type="checkbox"]),
-.kinship-main textarea,
-.kinship-main select { transition:border-color .2s, box-shadow .2s; }
-.kinship-main input:not([type="range"]):not([type="checkbox"]):focus-visible,
-.kinship-main textarea:focus-visible,
-.kinship-main select:focus-visible { box-shadow:0 0 0 4px rgba(77,136,105,.12); }
-.kinship-main-inner .leaflet-container { border-radius:18px; }
-.kinship-main-inner .bg-forest { background-color:#173f35; }
-.kinship-main-inner .bg-cream { background-color:#f3f6ec; }
-.kinship-main-inner .bg-sage\/40 { background-color:rgba(185,205,184,.38); }
-.kinship-main-inner .bg-peach\/40 { background-color:rgba(245,214,189,.44); }
+.kinship-shell .bg-cream { background-color: var(--neo-glass-soft); }
 
-:where(.kinship-shell) :is(a,button,input,textarea,select):focus-visible { outline:3px solid #96bb81; outline-offset:3px; }
+/* "Forest" panels (the species voice, agreement headers) become deep green glass. */
+.kinship-shell .bg-forest {
+  background-color: transparent;
+  background-image: radial-gradient(120% 90% at 100% 0%, rgba(61, 255, 176, 0.14), transparent 55%), linear-gradient(155deg, #0b2c22, #04170f);
+  box-shadow: inset 0 0 0 1px rgba(61, 255, 176, 0.16);
+}
 
-@media (max-width:1200px) {
-  .kinship-display-title { font-size:clamp(3.75rem, 7.5vw, 6.6rem); }
-  .kinship-scene-svg { transform:translateX(80px); }
+/* "Forest" buttons become neon buttons. */
+.kinship-shell .bg-forest.text-white {
+  background-image: none;
+  background-color: var(--neo-mint);
+  color: #03140f;
+  box-shadow: 0 0 22px -6px rgba(61, 255, 176, 0.7);
 }
-@media (max-width:850px) {
-  .kinship-hero-vignette { background:linear-gradient(90deg,rgba(6,30,26,.96) 0%,rgba(6,30,26,.84) 50%,rgba(6,30,26,.28) 100%),linear-gradient(0deg,rgba(5,25,20,.6),transparent 32%); }
-  .kinship-scene-svg { transform:translateX(180px); }
-  .kinship-scene-coordinate { display:none; }
-  .kinship-display-title { font-size:clamp(3.9rem, 9.5vw, 6rem); }
+
+.kinship-shell .bg-forest.text-white:hover:not(:disabled) { background-color: #8dffd0; }
+
+.kinship-card {
+  border-color: var(--neo-line);
+  box-shadow: 0 26px 60px -42px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(220, 255, 240, 0.05);
 }
-@media (max-width:580px) {
-  .kinship-main { padding-top:16px; }
-  .kinship-display-title { font-size:clamp(3.35rem, 14.5vw, 5.4rem); line-height:.95; }
-  .kinship-hero-copy { padding-top:75px; padding-bottom:70px; }
-  .kinship-hero-vignette { background:linear-gradient(90deg,rgba(6,30,26,.95),rgba(6,30,26,.62)),linear-gradient(0deg,rgba(5,25,20,.6),transparent 32%); }
-  .kinship-scene-svg { transform:translateX(260px); opacity:.64; }
-  .kinship-hero-content { padding-left:24px; padding-right:24px; }
-  .kinship-hero-bottom { gap:12px; }
-  .kinship-editorial-heading { font-size:clamp(2.15rem, 9vw, 3rem); }
+
+.kinship-main-inner .kinship-card { border-radius: 24px; }
+.kinship-button { min-height: 43px; transition: transform 0.24s, box-shadow 0.24s, background-color 0.24s; }
+.kinship-button:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 0 30px -8px rgba(61, 255, 176, 0.6); }
+
+.kinship-main :is(input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), textarea, select) {
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
+
+.kinship-main :is(input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), textarea, select):focus-visible {
+  border-color: var(--neo-line-strong);
+  box-shadow: 0 0 0 4px rgba(61, 255, 176, 0.12);
+}
+
+.kinship-main input::placeholder,
+.kinship-main textarea::placeholder { color: rgba(198, 230, 215, 0.38); }
+
+/* The four step journey bar on case pages. */
+.journey-dot-done { background: rgba(61, 255, 176, 0.14); color: var(--neo-mint); box-shadow: inset 0 0 0 1px rgba(61, 255, 176, 0.35); }
+.journey-dot-now { background: var(--neo-mint); color: #03140f; box-shadow: 0 0 22px -2px rgba(61, 255, 176, 0.75); }
+.journey-dot-next { background: var(--neo-glass-soft); color: var(--neo-faint); box-shadow: inset 0 0 0 1px rgba(220, 255, 240, 0.08); }
+.journey-bar { background: rgba(220, 255, 240, 0.08); overflow: hidden; position: relative; }
+.journey-bar.is-lit { background: var(--neo-mint); box-shadow: 0 0 12px rgba(61, 255, 176, 0.7); }
+
+/* The small Leaflet maps go dark to match. */
+.kinship-shell .leaflet-container { background: #06140f; }
+.kinship-shell .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.82) saturate(0.55) contrast(0.92); }
+.kinship-shell .leaflet-control-attribution { background: rgba(3, 20, 15, 0.8) !important; color: var(--neo-muted); }
+.kinship-shell .leaflet-control-attribution a { color: var(--neo-mint); }
+.kinship-shell .leaflet-bar a { background: rgba(3, 20, 15, 0.9); color: var(--neo-mint); border-color: var(--neo-line); }
+.kinship-main-inner .leaflet-container { border-radius: 18px; }
+
+:where(.kinship-shell) :is(a, button, input, textarea, select):focus-visible { outline: 2px solid var(--neo-mint); outline-offset: 3px; }
+
+/* ---------- 3D scroll reveal ----------
+   Sections tilt up from below and settle as they enter the screen. The browser runs this on
+   its compositor, tied to the (smoothed) scroll position, so it stays silky. Browsers without
+   scroll timelines simply show everything. */
+@keyframes depth-rise {
+  from {
+    opacity: 0;
+    transform: perspective(1100px) translate3d(0, 64px, -60px) rotateX(16deg) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .kinship-main-inner .page-enter > * > :not(.no-reveal),
+    .reveal-3d {
+      transform-origin: 50% 0%;
+      animation: depth-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0px entry 280px;
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior:auto; }
-  .kinship-bird, .kinship-pollen { animation:none !important; }
-  .kinship-journey-card, .kinship-button, .kinship-new-case, .kinship-hero-cta { transition:none !important; }
-  .kinship-journey-card:hover, .kinship-button:hover, .kinship-new-case:hover, .kinship-hero-cta:hover { transform:none !important; }
+  .kinship-button,
+  .kinship-new-case { transition: none !important; }
+  .kinship-button:hover,
+  .kinship-new-case:hover { transform: none !important; }
+  .depth-leaf, .depth-dust-near { display: none; }
 }

@@ -1,12 +1,66 @@
-import { CheckCircle2, ShieldAlert } from "lucide-react";
+import {
+  Building2,
+  CircleDashed,
+  Clock,
+  Euro,
+  Eye,
+  Fence,
+  Gauge,
+  Handshake,
+  HardHat,
+  House,
+  Landmark,
+  Leaf,
+  Microscope,
+  Moon,
+  PawPrint,
+  Route,
+  Scale,
+  Sparkles,
+  Truck,
+  UserRound,
+  Users,
+  Wrench,
+  type LucideIcon,
+} from "lucide-react";
 import type { Solution } from "../../services/live/types";
 import { isEligible, partyLabel, planBlockers } from "../../services/live/adapters";
 import ScoreRing from "../../components/ui/ScoreRing";
+import PlanTile, { type PlanChip } from "../mediation/PlanTile";
+import { tidyText } from "../../utils/tidyText";
 
-const originLabels: Record<string, string> = {
-  generated: "Mediator's proposal",
-  human_revision: "Your counter-proposal",
-  representative_counter: "Representative's counter-offer",
+const strategyLooks: Record<string, { icon: LucideIcon; label: string }> = {
+  seasonal_quiet_zone: { icon: CircleDashed, label: "Quiet zone" },
+  screen_mitigation: { icon: Fence, label: "Screen" },
+  schedule_shift: { icon: Clock, label: "New timing" },
+  alternative_habitat: { icon: House, label: "New home" },
+  dark_corridor: { icon: Moon, label: "Dark corridor" },
+  safe_passage: { icon: Route, label: "Safe passage" },
+  watch_and_adapt: { icon: Eye, label: "Watch and adapt" },
+};
+
+const originTags: Record<string, { icon: LucideIcon; label: string }> = {
+  generated: { icon: Sparkles, label: "Mediator's proposal" },
+  human_revision: { icon: UserRound, label: "Your counter proposal" },
+  representative_counter: { icon: PawPrint, label: "Representative's counter offer" },
+};
+
+const partyIcons: Record<string, LucideIcon> = {
+  reporter: UserRound,
+  residents: Users,
+  building_manager: Building2,
+  contractor: HardHat,
+  ecologist: Microscope,
+  delivery_operator: Truck,
+  city: Landmark,
+  species_representative: PawPrint,
+};
+
+const meterIcons: Record<string, LucideIcon> = {
+  wildlife_wellbeing: PawPrint,
+  human_wellbeing: Users,
+  feasibility: Wrench,
+  balance: Scale,
 };
 
 interface CardProps {
@@ -18,59 +72,42 @@ interface CardProps {
 
 export function LivePlanCard({ solution, selected, onSelect, isCurrent }: CardProps) {
   const eligible = isEligible(solution);
-  const blockers = planBlockers(solution);
   const index = solution.index_breakdown;
+  const look = strategyLooks[solution.strategy] ?? { icon: Leaf, label: tidyText(solution.strategy.replace(/_/g, " ")) };
+
+  const chips: PlanChip[] = [];
+  if (solution.cost_eur !== null) chips.push({ icon: Euro, label: String(solution.cost_eur), hint: "Cost in euro" });
+  if (solution.effort) chips.push({ icon: Gauge, label: solution.effort.replace(/^\w/, (c) => c.toUpperCase()), hint: "Effort" });
+  if (isCurrent) chips.push({ icon: Handshake, label: "On the table", hint: "Being negotiated now" });
 
   return (
-    <article className={`flex h-full flex-col rounded-3xl border bg-white p-5 shadow-sm transition-all ${selected ? "border-leaf ring-2 ring-leaf/20" : "border-forest/10"}`}>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="text-xs font-bold uppercase tracking-wider text-leaf">
-          {originLabels[solution.origin] ?? "Compromise option"}{solution.version > 1 ? ` · v${solution.version}` : ""}
-        </span>
-        {eligible ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-sage/30 px-3 py-1 text-xs text-forest"><CheckCircle2 size={13} /> All rules pass</span>
-        ) : (
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs text-amber-800"><ShieldAlert size={13} /> Blocked</span>
-        )}
-      </div>
-      <h3 className="mt-4 text-xl font-bold text-forest">{solution.title}</h3>
-      <p className="mt-1 text-sm font-medium text-leaf">
-        {solution.strategy.replace(/_/g, " ")}
-        {solution.cost_eur !== null ? ` · ${solution.cost_eur} EUR` : ""}
-        {solution.effort ? ` · ${solution.effort} effort` : ""}
-        {isCurrent ? " · on the table" : ""}
-      </p>
-      <p className="mt-3 text-sm leading-relaxed text-ink/70">{solution.summary}</p>
-      <ul className="mt-4 flex-1 space-y-2 text-sm text-ink/80">
-        {solution.actions.map((action, i) => (
-          <li key={i} className="flex gap-2">
-            <span className="text-leaf">✓</span>
-            <span>
-              <strong className="font-semibold text-forest">{partyLabel(action.party)}:</strong> {action.action}
-              {action.when ? <span className="text-ink/50"> ({action.when})</span> : null}
-            </span>
-          </li>
-        ))}
-      </ul>
-      {blockers.length > 0 && <p className="mt-4 text-sm text-amber-800">{blockers.join(" ")}</p>}
-      <div className="mt-6 flex items-center justify-between gap-3 border-t border-forest/10 pt-5">
-        <div>
-          <p className="text-xs text-ink/60">Coexistence Index</p>
-          <p className="text-2xl font-bold text-forest">
-            {Math.round(solution.coexistence_index)}/100 <span className="text-base" aria-hidden="true">{index?.emoji}</span>
-          </p>
-          <p className="text-xs text-ink/50">{index?.grade}</p>
-        </div>
-        <button
-          type="button"
-          onClick={onSelect}
-          aria-pressed={selected}
-          className={`rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${selected ? "bg-sage/40 text-forest" : "bg-forest text-white hover:bg-leaf"}`}
-        >
-          {selected ? "Selected" : "Explore plan"}
-        </button>
-      </div>
-    </article>
+    <PlanTile
+      title={tidyText(solution.title)}
+      kindIcon={look.icon}
+      kindLabel={`${look.label}${solution.version > 1 ? ` v${solution.version}` : ""}`}
+      tag={originTags[solution.origin] ?? { icon: Sparkles, label: "Compromise option" }}
+      eligible={eligible}
+      eligibleLabel="All rules pass"
+      index={solution.coexistence_index}
+      grade={index?.grade}
+      chips={chips}
+      meters={(index?.components ?? []).map((component) => ({
+        key: component.key,
+        icon: meterIcons[component.key] ?? Leaf,
+        label: component.label,
+        score: component.score,
+      }))}
+      summary={tidyText(solution.summary)}
+      steps={solution.actions.map((action) => ({
+        icon: partyIcons[action.party] ?? UserRound,
+        who: partyLabel(action.party),
+        text: tidyText(action.action),
+        when: action.when ? tidyText(action.when) : null,
+      }))}
+      blockers={planBlockers(solution).map(tidyText)}
+      selected={selected}
+      onSelect={onSelect}
+    />
   );
 }
 
@@ -148,13 +185,13 @@ export function LiveComparison({ solutions }: { solutions: Solution[] }) {
                 <th className="py-3 pr-4 font-medium text-ink/70">{row.label}</th>
                 {solutions.map((s) => {
                   const c = s.index_breakdown.components.find((x) => x.key === row.key);
-                  return <td key={s.id} className="px-3 py-3 tabular-nums">{c ? Math.round(c.score) : "—"}</td>;
+                  return <td key={s.id} className="px-3 py-3 tabular-nums">{c ? Math.round(c.score) : "·"}</td>;
                 })}
               </tr>
             ))}
             <tr className="border-b border-forest/10">
               <th className="py-3 pr-4 font-medium text-ink/70">Cost</th>
-              {solutions.map((s) => <td key={s.id} className="px-3 py-3 tabular-nums">{s.cost_eur !== null ? `${s.cost_eur} EUR` : "—"}</td>)}
+              {solutions.map((s) => <td key={s.id} className="px-3 py-3 tabular-nums">{s.cost_eur !== null ? `${s.cost_eur} EUR` : "·"}</td>)}
             </tr>
             <tr className="font-semibold text-forest">
               <th className="py-3 pr-4">Coexistence Index</th>
