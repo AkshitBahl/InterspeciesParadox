@@ -16,6 +16,8 @@ import {
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
 import LoadingState from "../../components/ui/LoadingState";
+import LeafSpinner from "../../components/ui/LeafSpinner";
+import { leafBurst } from "../../components/ui/leafBurst";
 import { useLiveData } from "../../hooks/useLiveData";
 import { liveApi } from "../../services/live/api";
 import { formatDate, partyLabel } from "../../services/live/adapters";
@@ -84,7 +86,9 @@ export default function LiveAgreementPage() {
   const human = data.parties.find((p) => p.role === "reporter");
   const wildlife = data.parties.find((p) => p.role === "species_representative");
 
-  async function sign() {
+  async function sign(button: HTMLElement) {
+    // Remember where the button is: it is replaced by the "You signed" note once signing works.
+    const spot = button.getBoundingClientRect();
     setBusy(true);
     setError("");
     setMessage("");
@@ -92,6 +96,7 @@ export default function LiveAgreementPage() {
       agreement.setData(await liveApi.signAgreement(data.id));
       conflict.reload();
       setMessage("Signed. Thank you for making room for your wild neighbor.");
+      leafBurst(spot);
     } catch (err) {
       setError(errorMessage(err));
     } finally {
@@ -261,8 +266,8 @@ export default function LiveAgreementPage() {
             </p>
             <div className="space-y-3">
               {canSign && (
-                <Button onClick={sign} disabled={busy} className="w-full">
-                  <PenLine size={17} /> {busy ? "Signing…" : "Sign the agreement"}
+                <Button onClick={(event) => sign(event.currentTarget)} disabled={busy} className="w-full">
+                  {busy ? <LeafSpinner size={17} /> : <PenLine size={17} />} {busy ? "Signing…" : "Sign the agreement"}
                 </Button>
               )}
               {signedByMe && (

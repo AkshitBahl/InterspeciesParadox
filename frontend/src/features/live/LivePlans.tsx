@@ -1,6 +1,7 @@
 import { CheckCircle2, ShieldAlert } from "lucide-react";
 import type { Solution } from "../../services/live/types";
 import { isEligible, partyLabel, planBlockers } from "../../services/live/adapters";
+import ScoreRing from "../../components/ui/ScoreRing";
 
 const originLabels: Record<string, string> = {
   generated: "Mediator's proposal",
@@ -85,8 +86,8 @@ export function LiveIndexPanel({ solution }: { solution: Solution }) {
           <p className="mt-1 text-sm text-ink/60">{index.grade} {index.emoji}</p>
         </div>
         <div className="rounded-2xl bg-sage/30 px-5 py-3 text-center">
-          <div className="text-3xl font-bold text-forest">{Math.round(index.index)}/100</div>
-          <div className="text-xs text-forest/70">{index.raw_index !== index.index ? `Capped from ${Math.round(index.raw_index)}` : "Weighted score"}</div>
+          <ScoreRing score={index.index} />
+          <div className="mt-1 text-xs text-forest/70">{index.raw_index !== index.index ? `Capped from ${Math.round(index.raw_index)}` : "Weighted score"}</div>
         </div>
       </div>
       {blockers.length > 0 && (

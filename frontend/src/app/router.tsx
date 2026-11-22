@@ -7,6 +7,7 @@ import MediationPage from "../features/mediation/MediationPage";
 import AgreementPage from "../features/agreement/AgreementPage";
 import AppLayout from "../components/layout/AppLayout";
 import DashboardPage from "../features/dashboard/DashboardPage";
+import PageLoader from "../components/ui/PageLoader";
 
 import { USE_MOCKS } from "../services/conflictGateway";
 import LoginPage from "../features/live/LoginPage";
@@ -55,7 +56,7 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: (
-      <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-forest text-cream">Growing your neighborhood…</div>}>
+      <Suspense fallback={<PageLoader label="Growing your neighborhood…" />}>
         <IntroPage />
       </Suspense>
     ),
@@ -64,7 +65,7 @@ export const router = createBrowserRouter([
     // Full screen, outside the app layout, so the map gets the whole page. Public in both modes.
     path: "/map",
     element: (
-      <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-forest text-cream">Drawing the neighborhood…</div>}>
+      <Suspense fallback={<PageLoader label="Drawing the neighborhood…" />}>
         <MapPage />
       </Suspense>
     ),

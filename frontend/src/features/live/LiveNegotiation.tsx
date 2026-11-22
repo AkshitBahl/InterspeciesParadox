@@ -3,6 +3,7 @@ import { Handshake, MessagesSquare, Send, SlidersHorizontal } from "lucide-react
 
 import Button from "../../components/ui/Button";
 import LoadingState from "../../components/ui/LoadingState";
+import LeafSpinner from "../../components/ui/LeafSpinner";
 import { useLiveData } from "../../hooks/useLiveData";
 import { liveApi } from "../../services/live/api";
 import { errorMessage } from "../../services/live/client";
@@ -144,7 +145,7 @@ export default function LiveNegotiation({ conflictId, solution, negotiation, can
           Put <strong>{solution.title}</strong> on the table. You can then tweak it and the species representative will answer.
         </p>
         <Button className="mt-5" disabled={busy !== ""} onClick={() => run("open", async () => onNegotiation(await liveApi.openNegotiation(conflictId, solution.id)))}>
-          {busy === "open" ? "Opening…" : "Start negotiating on this plan"}
+          {busy === "open" ? <><LeafSpinner size={17} /> Opening…</> : "Start negotiating on this plan"}
         </Button>
         {error && <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>}
       </section>
@@ -200,7 +201,7 @@ export default function LiveNegotiation({ conflictId, solution, negotiation, can
                   })
                 }
               >
-                {busy === "counter" ? "Waiting for the answer…" : `Send counter-proposal${Object.keys(changed).length ? ` (${Object.keys(changed).length} change${Object.keys(changed).length > 1 ? "s" : ""})` : ""}`}
+                {busy === "counter" ? <><LeafSpinner size={17} /> Waiting for the answer…</> : `Send counter-proposal${Object.keys(changed).length ? ` (${Object.keys(changed).length} change${Object.keys(changed).length > 1 ? "s" : ""})` : ""}`}
               </Button>
             </>
           ) : (
@@ -264,7 +265,7 @@ export default function LiveNegotiation({ conflictId, solution, negotiation, can
           <p className="text-sm font-semibold text-forest">Happy with “{solution.title}”?</p>
           <p className="mt-1 text-xs text-ink/60">Accepting writes a temporary coexistence agreement for you to sign.</p>
           <Button className="mt-4" disabled={!canAccept || busy !== ""} onClick={() => run("accept", onAccept)}>
-            {busy === "accept" ? "Writing the agreement…" : "Accept this plan"}
+            {busy === "accept" ? <><LeafSpinner size={17} /> Writing the agreement…</> : "Accept this plan"}
           </Button>
           {!canAccept && <p className="mt-2 text-xs text-ink/60">Only the person who reported this case can accept a plan. Log in as them to finish it.</p>}
         </div>

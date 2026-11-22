@@ -1,4 +1,4 @@
-import { LoaderCircle } from "lucide-react";
+import LeafSpinner from "./LeafSpinner";
 
 interface LoadingStateProps {
   label?: string;
@@ -16,7 +16,7 @@ export default function LoadingState({
       aria-busy="true"
       className={`flex items-center justify-center gap-3 rounded-2xl border border-forest/10 bg-white/85 text-forest ${compact ? "p-4" : "min-h-48 p-8"}`}
     >
-      <LoaderCircle className="animate-spin text-leaf motion-reduce:animate-none" size={compact ? 19 : 25} aria-hidden="true" />
+      <LeafSpinner className="text-leaf" size={compact ? 22 : 30} />
       <p className="text-sm font-medium">{label}</p>
     </div>
   );

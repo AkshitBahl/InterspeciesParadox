@@ -6,6 +6,7 @@ import { liveApi } from "../../services/live/api";
 import { errorMessage } from "../../services/live/client";
 import type { Statement } from "../../services/live/types";
 import { useLiveData } from "../../hooks/useLiveData";
+import LeafSpinner from "../../components/ui/LeafSpinner";
 import WildlifeProfile from "../wildlife/WildlifeProfile";
 import type { WildlifeMood } from "../wildlife/wildlifeScript";
 
@@ -117,7 +118,7 @@ export default function LiveRepresentative({ slug, representative, activity, top
           ) : intro.error ? (
             <p className="text-sm text-amber-200">{intro.error}</p>
           ) : (
-            <p className="text-sm text-sage">Listening…</p>
+            <p className="flex items-center gap-2 text-sm text-sage"><LeafSpinner size={18} /> Listening…</p>
           )}
 
           {statement?.grounding && statement.grounding.length > 0 && (

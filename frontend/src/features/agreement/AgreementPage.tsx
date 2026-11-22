@@ -18,6 +18,7 @@ import { useHumanProfile } from "../../hooks/useHumanProfile";
 import { evaluatePlan } from "../mediation/mediationLogic";
 import type { SavedAgreementDraft } from "../../types/agreements";
 import AgreementCard from "./AgreementCard";
+import { leafBurst } from "../../components/ui/leafBurst";
 
 export default function AgreementPage() {
   const { id } = useParams();
@@ -65,13 +66,14 @@ export default function AgreementPage() {
     savedAgreement.mediationSavedAt === mediation.savedAt;
   const displayAgreement = hasMatchingSave && savedAgreement ? savedAgreement : preview;
 
-  function handleSave() {
+  function handleSave(button?: HTMLElement) {
     setError("");
     setMessage("");
     if (!validity.eligible) return;
     try {
       setSavedAgreement(saveAgreementDraft(preview));
       setMessage("Your agreement draft was saved in this browser.");
+      leafBurst(button ?? null);
     } catch {
       setError("Couldn't save the agreement in this browser. Please try again.");
     }
@@ -130,7 +132,7 @@ export default function AgreementPage() {
               Check the proposed conditions, save this draft locally, or copy its text to share for review.
             </p>
             <div className="space-y-3">
-              <Button onClick={handleSave} disabled={!validity.eligible} className="w-full">
+              <Button onClick={(event) => handleSave(event.currentTarget)} disabled={!validity.eligible} className="w-full">
                 <Save size={17} /> Save agreement draft
               </Button>
               <Button variant="secondary" onClick={handleCopy} className="w-full">

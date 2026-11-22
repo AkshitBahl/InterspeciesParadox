@@ -12,7 +12,7 @@ export default function AppLayout() {
   const isDashboard = pathname === "/dashboard";
 
   return (
-    <div className="kinship-shell min-h-screen lg:flex">
+    <div className="kinship-shell route-fade min-h-screen lg:flex">
       <div className="kinship-atmosphere" aria-hidden="true" />
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 

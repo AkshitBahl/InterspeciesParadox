@@ -4,6 +4,7 @@ import App from "./app/App";
 import "./styles/globals.css";
 import "./styles/polish.css";
 import "./styles/wildlife.css";
+import "./styles/motion.css";
 
 ReactDOM.createRoot(
   document.getElementById("root")!
