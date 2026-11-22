@@ -1,4 +1,5 @@
 import type { EvaluatedPlan } from "../../types/mediation";
+import ScoreRing from "../../components/ui/ScoreRing";
 
 const dimensions = [
   ["wildlifeProtection", "Wildlife protection"],
@@ -16,8 +17,8 @@ export default function CoexistenceIndex({ result }: { result: EvaluatedPlan }) 
           <p className="mt-1 text-sm text-ink/60">Illustrative scores, not verified ecological predictions.</p>
         </div>
         <div className="rounded-2xl bg-sage/30 px-5 py-3 text-center">
-          <div className="text-3xl font-bold text-forest">{result.index === null ? "—" : `${result.index}/100`}</div>
-          <div className="text-xs text-forest/70">Weakest-link index</div>
+          <ScoreRing score={result.index} />
+          <div className="mt-1 text-xs text-forest/70">Weakest-link index</div>
         </div>
       </div>
       {!result.eligible && (

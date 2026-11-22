@@ -1,10 +1,20 @@
 /* Subtle transitions shared by pages. Keep this separate from your Tailwind theme. */
 @keyframes kinship-rise {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
 }
 
-.page-enter { animation: kinship-rise 320ms cubic-bezier(.2,.7,.2,1) both; }
+/* A soft fade each time you switch screens inside the app.
+   "backwards" (not "both") so no transform stays on the page once the fade ends. */
+.page-enter { animation: kinship-rise 340ms cubic-bezier(.2,.7,.2,1) backwards; }
+
+/* A gentle whole screen fade when you move between the intro and the app. Opacity only. */
+@keyframes kinship-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.route-fade { animation: kinship-fade 380ms ease-out backwards; }
 
 :where(button, a, input, textarea, select):focus-visible {
   outline: 3px solid #4f886d;
@@ -12,7 +22,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .page-enter { animation: none; }
+  .page-enter, .route-fade { animation: none; }
   *, *::before, *::after {
     scroll-behavior: auto !important;
     animation-duration: 0.01ms !important;

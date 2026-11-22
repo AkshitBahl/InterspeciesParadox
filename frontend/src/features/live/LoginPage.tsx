@@ -4,6 +4,7 @@ import { KeyRound, LogIn, Server } from "lucide-react";
 
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
+import LeafSpinner from "../../components/ui/LeafSpinner";
 import { API_BASE_URL } from "../../services/apiClient";
 import { errorMessage, login } from "../../services/live/client";
 import { DEMO_PASSWORD, demoAccounts } from "./session";
@@ -60,7 +61,7 @@ export default function LoginPage() {
           </label>
           {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
           <Button type="submit" disabled={busy} className="w-full">
-            <LogIn size={17} /> {busy ? "Logging in…" : "Log in"}
+            {busy ? <LeafSpinner size={17} /> : <LogIn size={17} />} {busy ? "Logging in…" : "Log in"}
           </Button>
         </form>
 

@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import type { Direction, } from "./introWorld";
 import type { IntroPhase } from "./MiniCityGame";
+import LeafSpinner from "../../components/ui/LeafSpinner";
 import "../../styles/intro.css";
 
 const MiniCityGame = lazy(() => import("./MiniCityGame"));
@@ -41,9 +42,9 @@ export default function IntroPage() {
   const nextDialogue = () => setDialogueStep((step) => Math.min(step + 1, 2));
 
   return (
-    <main className="kinship-intro" id="intro-main">
+    <main className="kinship-intro route-fade" id="intro-main">
       <div className="intro-world-stage" aria-hidden="true">
-        <Suspense fallback={<div className="intro-scene-loading">Growing your neighborhood…</div>}>
+        <Suspense fallback={<div className="intro-scene-loading"><span className="flex flex-col items-center gap-4"><LeafSpinner size={38} className="text-[#b9d39f]" />Growing your neighborhood…</span></div>}>
           <MiniCityGame key={runId} phase={phase} virtualDirection={direction} autoWalk={autoWalk} onEncounter={onEncounter} />
         </Suspense>
       </div>
