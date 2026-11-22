@@ -26,7 +26,7 @@ export default function JourneyProgress() {
   const currentIndex = steps.findIndex((step) => step.id === stage);
 
   return (
-    <nav aria-label="Your coexistence journey" className="mb-8 rounded-3xl border border-forest/10 bg-white/85 p-4 shadow-sm sm:p-5">
+    <nav aria-label="Your coexistence journey" className="journey-progress mb-8 rounded-3xl border border-forest/10 bg-white/85 p-4 shadow-sm sm:p-5">
       <div className="mb-4 flex items-center justify-between gap-2">
         <p className="text-xs font-bold uppercase tracking-[0.15em] text-leaf">Your journey</p>
         <p className="text-xs font-medium text-ink/55" aria-live="polite">Step {currentIndex + 1} of {steps.length}</p>
@@ -42,7 +42,7 @@ export default function JourneyProgress() {
                 <span
                   className={[
                     "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold sm:h-10 sm:w-10",
-                    isComplete ? "bg-sage text-forest" : isCurrent ? "bg-forest text-cream" : "bg-cream text-ink/40",
+                    isComplete ? "journey-dot-done" : isCurrent ? "journey-dot-now" : "journey-dot-next",
                   ].join(" ")}
                 >
                   {isComplete ? <Check size={17} aria-hidden="true" /> : index + 1}
@@ -54,7 +54,7 @@ export default function JourneyProgress() {
                   <p className="hidden text-xs text-ink/45 lg:block">{step.subtitle}</p>
                 </div>
               </div>
-              <div className={`mt-3 h-1 rounded-full ${isComplete || isCurrent ? "bg-leaf" : "bg-forest/10"}`} />
+              <div className={`journey-bar mt-3 h-1 rounded-full ${isComplete || isCurrent ? "is-lit" : ""}`} />
             </li>
           );
         })}

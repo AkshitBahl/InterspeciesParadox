@@ -1,0 +1,397 @@
+/* Plan cards: small, visual, and a little 3D.
+   Hover: the card leans towards the pointer, a light follows the cursor, a neon line runs
+   around the edge and the icon and ring float forward. All of it stops for reduced motion. */
+
+@property --plan-sweep {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@property --plan-lift {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+.plan-tile {
+  --mint: var(--neo-mint, #3dffb0);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 20px;
+  border-radius: 24px;
+  border: 1px solid var(--neo-line, rgba(61, 255, 176, 0.16));
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgba(61, 255, 176, 0.07), transparent 55%),
+    linear-gradient(160deg, rgba(10, 38, 29, 0.92), rgba(4, 20, 15, 0.94));
+  color: var(--neo-text, #dcfff0);
+  box-shadow: 0 24px 50px -32px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(220, 255, 240, 0.05);
+  transform-style: preserve-3d;
+  transform: perspective(900px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)) translate3d(0, var(--plan-lift), 0);
+  transition: --plan-lift 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.45s ease, border-color 0.45s ease;
+}
+
+/* The running neon line around the edge. */
+.plan-tile::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(from var(--plan-sweep), transparent 0 62%, rgba(61, 255, 176, 0.15) 70%, var(--mint) 84%, #b6ffe0 88%, transparent 96%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  animation: plan-sweep 2.8s linear infinite paused;
+}
+
+/* The light that follows the cursor. */
+.plan-tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(260px circle at var(--glare-x, 50%) var(--glare-y, 0%), rgba(61, 255, 176, 0.14), transparent 60%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+@keyframes plan-sweep {
+  to { --plan-sweep: 360deg; }
+}
+
+.plan-tile:hover,
+.plan-tile:focus-within {
+  --plan-lift: -6px;
+  border-color: rgba(61, 255, 176, 0.32);
+  box-shadow: 0 40px 70px -34px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(61, 255, 176, 0.08), 0 0 46px -10px rgba(61, 255, 176, 0.3);
+}
+
+.plan-tile:hover::before,
+.plan-tile:focus-within::before {
+  opacity: 1;
+  animation-play-state: running;
+}
+
+.plan-tile:hover::after { opacity: 1; }
+
+.plan-tile.is-selected {
+  border-color: rgba(61, 255, 176, 0.55);
+  box-shadow: 0 30px 60px -34px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(61, 255, 176, 0.35), 0 0 40px -12px rgba(61, 255, 176, 0.45);
+}
+
+.plan-tile.is-selected::before {
+  opacity: 0.8;
+  animation-play-state: running;
+}
+
+/* Pieces that float above the card surface in 3D. */
+.plan-tile .tilt-pop {
+  transform: translateZ(0);
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.5s ease;
+}
+
+.plan-tile:hover .tilt-pop { transform: translateZ(42px); }
+
+.plan-tile-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.plan-kind {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+  color: var(--mint);
+  background: linear-gradient(145deg, rgba(61, 255, 176, 0.18), rgba(61, 255, 176, 0.04));
+  border: 1px solid rgba(61, 255, 176, 0.3);
+  box-shadow: 0 0 22px -6px rgba(61, 255, 176, 0.55), inset 0 0 12px rgba(61, 255, 176, 0.12);
+}
+
+.plan-tile:hover .plan-kind { box-shadow: 0 0 34px -4px rgba(61, 255, 176, 0.8), inset 0 0 14px rgba(61, 255, 176, 0.2); }
+
+.plan-flags { display: flex; align-items: center; gap: 6px; }
+
+.plan-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 26px;
+  padding: 0 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(220, 255, 240, 0.12);
+  background: rgba(220, 255, 240, 0.05);
+  color: var(--neo-muted, #84b9a3);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.plan-flag.is-pass { color: var(--mint); border-color: rgba(61, 255, 176, 0.25); background: rgba(61, 255, 176, 0.08); }
+.plan-flag.is-blocked { color: #ffc24b; border-color: rgba(255, 194, 75, 0.35); background: rgba(255, 194, 75, 0.1); }
+
+.plan-kind-label {
+  margin-top: 16px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mint);
+  opacity: 0.85;
+}
+
+.plan-title {
+  margin-top: 6px;
+  min-height: 2.5em;
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--neo-text, #dcfff0);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.plan-core {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.plan-ring {
+  position: relative;
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  filter: drop-shadow(0 0 10px rgba(61, 255, 176, 0.35));
+}
+
+.plan-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.plan-ring circle { fill: none; stroke-width: 6; }
+.plan-ring-track { stroke: rgba(220, 255, 240, 0.09); }
+.plan-ring-fill { stroke: var(--mint); stroke-linecap: round; }
+.is-blocked .plan-ring-fill { stroke: #ffc24b; }
+
+.plan-ring > span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  color: var(--neo-text, #dcfff0);
+}
+
+.plan-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.plan-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(220, 255, 240, 0.06);
+  border: 1px solid rgba(220, 255, 240, 0.1);
+  color: var(--neo-text, #dcfff0);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.plan-chip svg { color: var(--mint); }
+
+.plan-meters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 16px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(220, 255, 240, 0.08);
+}
+
+.plan-meters li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--neo-muted, #84b9a3);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.plan-meter {
+  position: relative;
+  flex: 1;
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(220, 255, 240, 0.08);
+}
+
+.plan-meter > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(61, 255, 176, 0.55), var(--mint));
+  box-shadow: 0 0 10px rgba(61, 255, 176, 0.6);
+  transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.plan-meter-value {
+  min-width: 2ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--neo-text, #dcfff0);
+}
+
+.plan-actions {
+  /* Lift the buttons a hair above the tilted card, so clicks always reach them. */
+  position: relative;
+  transform: translateZ(1px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.plan-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 12px;
+  color: var(--neo-muted, #84b9a3);
+  font-size: 13px;
+  font-weight: 600;
+  transition: color 0.25s ease, background-color 0.25s ease;
+}
+
+.plan-more:hover { color: var(--neo-text, #dcfff0); background: rgba(220, 255, 240, 0.06); }
+
+.plan-more-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: rgba(61, 255, 176, 0.14);
+  color: var(--mint);
+  font-size: 11px;
+}
+
+.plan-more-chevron { transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.plan-more[aria-expanded="true"] .plan-more-chevron { transform: rotate(180deg); }
+
+.plan-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 12px;
+  background: var(--mint);
+  color: #03140f;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 0 24px -6px rgba(61, 255, 176, 0.7);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+}
+
+.plan-select:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 0 32px -4px rgba(61, 255, 176, 0.9); }
+.plan-select:disabled { cursor: not-allowed; opacity: 0.45; box-shadow: none; }
+
+.plan-select[aria-pressed="true"] {
+  background: rgba(61, 255, 176, 0.12);
+  color: var(--mint);
+  box-shadow: inset 0 0 0 1px rgba(61, 255, 176, 0.45);
+}
+
+/* Steps open with a smooth height change (grid rows from 0fr to 1fr). */
+.plan-details {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s ease;
+}
+
+.plan-details.is-open { grid-template-rows: 1fr; opacity: 1; }
+.plan-details-inner { min-height: 0; overflow: hidden; }
+
+.plan-summary {
+  margin-top: 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--neo-muted, #84b9a3);
+}
+
+.plan-steps { display: grid; gap: 12px; margin-top: 14px; }
+.plan-steps li { display: flex; gap: 10px; }
+
+.plan-step-icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: rgba(61, 255, 176, 0.1);
+  color: var(--mint);
+}
+
+.plan-step-who {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--neo-text, #dcfff0);
+}
+
+.plan-step-when {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(220, 255, 240, 0.07);
+  color: var(--neo-muted, #84b9a3);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.plan-step-text { margin-top: 2px; font-size: 12.5px; line-height: 1.55; color: var(--neo-muted, #84b9a3); }
+.plan-blockers { margin-top: 14px; font-size: 12px; line-height: 1.5; color: #ffc24b; }
+
+@media (prefers-reduced-motion: reduce) {
+  .plan-tile,
+  .plan-tile .tilt-pop,
+  .plan-details,
+  .plan-more-chevron,
+  .plan-meter > span { transition: none; }
+  .plan-tile::before { animation: none; }
+  .plan-tile:hover .tilt-pop { transform: none; }
+  .plan-tile:hover,
+  .plan-tile:focus-within { --plan-lift: 0px; }
+}

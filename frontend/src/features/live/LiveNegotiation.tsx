@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from "react";
-import { Handshake, MessagesSquare, Send, SlidersHorizontal } from "lucide-react";
+import { useState } from "react";
+import { Handshake, MessagesSquare, SlidersHorizontal } from "lucide-react";
 
 import Button from "../../components/ui/Button";
 import LoadingState from "../../components/ui/LoadingState";
@@ -8,11 +8,12 @@ import { useLiveData } from "../../hooks/useLiveData";
 import { liveApi } from "../../services/live/api";
 import { errorMessage } from "../../services/live/client";
 import type { CounterProposalResult, Negotiation, ParameterSpec, Solution, Verdict } from "../../services/live/types";
+import { tidyText } from "../../utils/tidyText";
 
 const verdictText: Record<Verdict, { label: string; style: string }> = {
   accept: { label: "Accepted", style: "border-leaf bg-sage/30 text-forest" },
   accept_with_concerns: { label: "Accepted, with concerns", style: "border-amber-300 bg-amber-50 text-amber-900" },
-  counter: { label: "Counter-offer", style: "border-peach bg-peach/30 text-forest" },
+  counter: { label: "Counter offer", style: "border-peach bg-peach/30 text-forest" },
   reject: { label: "Rejected", style: "border-red-300 bg-red-50 text-red-800" },
 };
 
@@ -117,8 +118,7 @@ export default function LiveNegotiation({ conflictId, solution, negotiation, can
   const params = useLiveData(`params:${solution.id}`, () => liveApi.parameters(solution.id));
   const [changes, setChanges] = useState<Record<string, unknown>>({});
   const [note, setNote] = useState("");
-  const [chat, setChat] = useState("");
-  const [busy, setBusy] = useState<"" | "open" | "counter" | "chat" | "accept">("");
+  const [busy, setBusy] = useState<"" | "open" | "counter" | "accept">("");
   const [error, setError] = useState("");
 
   async function run(kind: typeof busy, action: () => Promise<void>) {
@@ -142,7 +142,7 @@ export default function LiveNegotiation({ conflictId, solution, negotiation, can
       <section className="rounded-3xl border border-forest/10 bg-white p-6 shadow-sm">
         <h2 className="flex items-center gap-2 text-xl font-bold text-forest"><Handshake size={21} /> Negotiate your compromise</h2>
         <p className="mt-2 text-sm text-ink/60">
-          Put <strong>{solution.title}</strong> on the table. You can then tweak it and the species representative will answer.
+          Put <strong>{tidyText(solution.title)}</strong> on the table. You can then tweak it and the species representative will answer.
         </p>
         <Button className="mt-5" disabled={busy !== ""} onClick={() => run("open", async () => onNegotiation(await liveApi.openNegotiation(conflictId, solution.id)))}>
           {busy === "open" ? <><LeafSpinner size={17} /> Opening…</> : "Start negotiating on this plan"}
@@ -160,7 +160,7 @@ export default function LiveNegotiation({ conflictId, solution, negotiation, can
       <div>
         <h2 className="flex items-center gap-2 text-xl font-bold text-forest"><Handshake size={21} /> Negotiate your compromise</h2>
         <p className="mt-2 text-sm text-ink/60">
-          Selected: <strong>{solution.title}</strong> · round {negotiation.rounds} · {negotiation.status}
+          Selected: <strong>{tidyText(solution.title)}</strong> · round {negotiation.rounds} · {negotiation.status}
         </p>
       </div>
 
@@ -201,11 +201,11 @@ export default function LiveNegotiation({ conflictId, solution, negotiation, can
                   })
                 }
               >
-                {busy === "counter" ? <><LeafSpinner size={17} /> Waiting for the answer…</> : `Send counter-proposal${Object.keys(changed).length ? ` (${Object.keys(changed).length} change${Object.keys(changed).length > 1 ? "s" : ""})` : ""}`}
+                {busy === "counter" ? <><LeafSpinner size={17} /> Waiting for the answer…</> : `Send counter proposal${Object.keys(changed).length ? ` (${Object.keys(changed).length} change${Object.keys(changed).length > 1 ? "s" : ""})` : ""}`}
               </Button>
             </>
           ) : (
-            <p className="text-sm text-ink/60">This plan has nothing to tweak. Chat or accept it below.</p>
+            <p className="text-sm text-ink/60">This plan has nothing to tweak. Accept it below.</p>
           )}
         </div>
       )}
@@ -217,16 +217,16 @@ export default function LiveNegotiation({ conflictId, solution, negotiation, can
           </p>
           {lastVerdict.messages
             .filter((m) => m.author_type === "representative")
-            .map((m) => <p key={m.id} className="mt-2 italic">“{m.text}”</p>)}
+            .map((m) => <p key={m.id} className="mt-2 italic">“{tidyText(m.text)}”</p>)}
           {lastVerdict.counter_solution && (
-            <p className="mt-2">The representative made a counter-offer: <strong>{lastVerdict.counter_solution.title}</strong> (index {Math.round(lastVerdict.counter_solution.coexistence_index)}). It's now in the plan list.</p>
+            <p className="mt-2">The representative made a counter offer: <strong>{tidyText(lastVerdict.counter_solution.title)}</strong> (index {Math.round(lastVerdict.counter_solution.coexistence_index)}). It's now in the plan list.</p>
           )}
         </div>
       )}
 
       <div className="space-y-3 border-t border-forest/10 pt-5">
         <p className="flex items-center gap-2 text-sm font-semibold text-forest"><MessagesSquare size={16} /> Conversation</p>
-        <ol className="max-h-72 space-y-2 overflow-y-auto pr-1">
+        <ol className="max-h-72 space-y-2 overflow-y-auto pr-1" data-lenis-prevent>
           {messages.map((m) => (
             <li
               key={m.id}
@@ -235,34 +235,17 @@ export default function LiveNegotiation({ conflictId, solution, negotiation, can
               }`}
             >
               <span className="block text-[11px] font-bold uppercase tracking-wider opacity-70">{m.author_name}</span>
-              {m.text}
+              {tidyText(m.text)}
             </li>
           ))}
         </ol>
-        {!closed && (
-          <form
-            className="flex gap-2"
-            onSubmit={(event: FormEvent) => {
-              event.preventDefault();
-              if (!chat.trim()) return;
-              run("chat", async () => {
-                await liveApi.sendMessage(conflictId, chat.trim());
-                setChat("");
-                onNegotiation(await liveApi.getNegotiation(conflictId));
-              });
-            }}
-          >
-            <input className={inputStyle} value={chat} maxLength={2000} onChange={(e) => setChat(e.target.value)} placeholder="Say something to the representative" aria-label="Message" />
-            <Button type="submit" disabled={busy !== "" || !chat.trim()} className="!px-4"><Send size={16} /></Button>
-          </form>
-        )}
       </div>
 
       {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
 
       {!closed && (
         <div className="rounded-2xl bg-sage/25 p-5">
-          <p className="text-sm font-semibold text-forest">Happy with “{solution.title}”?</p>
+          <p className="text-sm font-semibold text-forest">Happy with “{tidyText(solution.title)}”?</p>
           <p className="mt-1 text-xs text-ink/60">Accepting writes a temporary coexistence agreement for you to sign.</p>
           <Button className="mt-4" disabled={!canAccept || busy !== ""} onClick={() => run("accept", onAccept)}>
             {busy === "accept" ? <><LeafSpinner size={17} /> Writing the agreement…</> : "Accept this plan"}

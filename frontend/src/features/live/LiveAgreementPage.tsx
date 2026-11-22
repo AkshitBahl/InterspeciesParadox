@@ -127,7 +127,7 @@ export default function LiveAgreementPage() {
     <div className="space-y-8">
       <header className="space-y-4">
         <div className="inline-flex items-center gap-2 rounded-full bg-sage/40 px-4 py-2 text-xs font-bold text-forest">
-          <Leaf size={15} /> STEP 04 — COEXISTENCE AGREEMENT
+          <Leaf size={15} /> STEP 04 · COEXISTENCE AGREEMENT
         </div>
         <h1 className="max-w-3xl text-4xl font-bold tracking-tight text-forest sm:text-5xl">
           A better way to <span className="text-leaf">share our space.</span>

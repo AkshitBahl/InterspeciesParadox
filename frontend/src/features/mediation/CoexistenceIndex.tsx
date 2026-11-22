@@ -43,7 +43,7 @@ export default function CoexistenceIndex({ result }: { result: EvaluatedPlan }) 
         ))}
       </div>
       <p className="mt-5 rounded-xl bg-cream p-4 text-xs leading-relaxed text-ink/70">
-        We first reject plans that violate essential requirements. For the remaining plans, the overall index equals the <strong>lowest</strong> dimension score — one party's wellbeing cannot be traded away for high marks elsewhere.
+        We first reject plans that violate essential requirements. For the remaining plans, the overall index equals the <strong>lowest</strong> dimension score, so one party's wellbeing cannot be traded away for high marks elsewhere.
       </p>
     </section>
   );

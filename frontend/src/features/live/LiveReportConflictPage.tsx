@@ -160,10 +160,10 @@ export default function LiveReportConflictPage() {
             <div className="border-t border-forest/10 pt-4">
               <p className="mb-3 text-sm font-semibold text-forest">What happens next?</p>
               <div className="space-y-3 text-sm text-ink/70">
-                <p>01 — Compare human and wildlife needs</p>
-                <p>02 — Explore compromise plans on the map</p>
-                <p>03 — Negotiate with the species representative</p>
-                <p>04 — Sign a temporary coexistence agreement</p>
+                <p>01 · Compare human and wildlife needs</p>
+                <p>02 · Explore compromise plans on the map</p>
+                <p>03 · Negotiate with the species representative</p>
+                <p>04 · Sign a temporary coexistence agreement</p>
               </div>
             </div>
           </Card>

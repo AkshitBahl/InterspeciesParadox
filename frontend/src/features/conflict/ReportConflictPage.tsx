@@ -157,10 +157,10 @@ export default function ReportConflictPage() {
               </p>
 
               <div className="space-y-3 text-sm text-ink/70">
-                <p>01 — Compare human and wildlife needs</p>
-                <p>02 — Explore compromise plans</p>
-                <p>03 — Negotiate the best arrangement</p>
-                <p>04 — Create your coexistence agreement</p>
+                <p>01 · Compare human and wildlife needs</p>
+                <p>02 · Explore compromise plans</p>
+                <p>03 · Negotiate the best arrangement</p>
+                <p>04 · Create your coexistence agreement</p>
               </div>
             </div>
           </Card>

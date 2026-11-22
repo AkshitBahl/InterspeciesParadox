@@ -40,7 +40,7 @@ export default function ScoreRing({ score, size = 96 }: ScoreRingProps) {
         )}
       </svg>
       <div aria-hidden="true" className="absolute inset-0 flex flex-col items-center justify-center leading-none">
-        <span className="text-3xl font-bold tabular-nums text-forest">{score === null ? "—" : Math.round(value)}</span>
+        <span className="text-3xl font-bold tabular-nums text-forest">{score === null ? "·" : Math.round(value)}</span>
         {score !== null && <span className="mt-1 text-[11px] font-semibold text-forest/55">/100</span>}
       </div>
     </div>

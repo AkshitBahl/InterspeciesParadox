@@ -1,13 +1,13 @@
-import { useState, type FormEvent } from "react";
-import { BookOpen, HeartHandshake, MessageCircle, Send, ShieldQuestion, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { BookOpen, HeartHandshake, MessageCircle, ShieldQuestion, Sparkles } from "lucide-react";
 
 import type { WildlifeActivity, WildlifeRepresentative } from "../../types";
 import { liveApi } from "../../services/live/api";
-import { errorMessage } from "../../services/live/client";
 import type { Statement } from "../../services/live/types";
 import { useLiveData } from "../../hooks/useLiveData";
 import LeafSpinner from "../../components/ui/LeafSpinner";
 import WildlifeProfile from "../wildlife/WildlifeProfile";
+import { tidyText } from "../../utils/tidyText";
 import type { WildlifeMood } from "../wildlife/wildlifeScript";
 
 export interface RepresentativeTopic {
@@ -32,7 +32,6 @@ const icons: Record<string, typeof MessageCircle> = {
   hello: MessageCircle,
   needs: ShieldQuestion,
   plan: HeartHandshake,
-  ask: Sparkles,
 };
 
 /**
@@ -42,36 +41,14 @@ const icons: Record<string, typeof MessageCircle> = {
 export default function LiveRepresentative({ slug, representative, activity, topics = [], initialTopic, compact }: Props) {
   const intro = useLiveData(`intro:${slug}`, () => liveApi.introduction(slug));
   const [topicId, setTopicId] = useState(initialTopic ?? "hello");
-  const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState<Statement | null>(null);
-  const [asking, setAsking] = useState(false);
-  const [askError, setAskError] = useState("");
   const [showSources, setShowSources] = useState(false);
 
   const allTopics: RepresentativeTopic[] = [
     { id: "hello", label: "Say hello", heading: "A little introduction", statement: intro.data, mood: "curious" },
     ...topics.filter((topic) => topic.statement),
-    ...(answer ? [{ id: "ask", label: "Your question", heading: "Answering your question", statement: answer, mood: "thoughtful" as const }] : []),
   ];
   const current = allTopics.find((topic) => topic.id === topicId) ?? allTopics[0];
   const statement = current.statement;
-
-  async function ask(event: FormEvent) {
-    event.preventDefault();
-    if (!question.trim()) return;
-    setAsking(true);
-    setAskError("");
-    try {
-      const reply = await liveApi.ask(slug, question.trim());
-      setAnswer(reply);
-      setTopicId("ask");
-      setQuestion("");
-    } catch (error) {
-      setAskError(errorMessage(error));
-    } finally {
-      setAsking(false);
-    }
-  }
 
   return (
     <section
@@ -112,7 +89,7 @@ export default function LiveRepresentative({ slug, representative, activity, top
           {statement ? (
             <div className="space-y-2 text-base leading-relaxed text-white sm:text-lg">
               {statement.lines.map((line, index) => (
-                <p key={index}>“{line}”</p>
+                <p key={index}>“{tidyText(line)}”</p>
               ))}
             </div>
           ) : intro.error ? (
@@ -144,25 +121,6 @@ export default function LiveRepresentative({ slug, representative, activity, top
           )}
         </div>
 
-        <form onSubmit={ask} className="flex gap-2">
-          <label className="sr-only" htmlFor={`ask-${slug}`}>Ask {representative.name} a question</label>
-          <input
-            id={`ask-${slug}`}
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            maxLength={1000}
-            placeholder={`Ask ${representative.name.split(" ")[0]} something, e.g. "When will you leave?"`}
-            className="min-w-0 flex-1 rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-sage/70 outline-none focus:border-sage"
-          />
-          <button
-            type="submit"
-            disabled={asking || !question.trim()}
-            className="inline-flex items-center gap-2 rounded-xl bg-cream px-4 py-3 text-sm font-semibold text-forest disabled:opacity-50"
-          >
-            <Send size={15} aria-hidden="true" /> {asking ? "…" : "Ask"}
-          </button>
-        </form>
-        {askError && <p role="alert" className="text-sm text-amber-200">{askError}</p>}
 
         <div className="flex items-start gap-2 border-t border-white/10 pt-4 text-xs leading-relaxed text-sage/90">
           <Sparkles size={15} className="mt-0.5 shrink-0" aria-hidden="true" />

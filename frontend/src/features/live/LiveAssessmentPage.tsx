@@ -77,7 +77,7 @@ export default function LiveAssessmentPage() {
     <div className="space-y-10">
       <section>
         <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-sage/40 px-4 py-2 text-xs font-semibold text-forest">
-          <Scale size={15} /> STEP 02 — NEEDS ASSESSMENT
+          <Scale size={15} /> STEP 02 · NEEDS ASSESSMENT
         </div>
         <h1 className="max-w-3xl text-4xl font-bold tracking-tight text-forest sm:text-5xl">
           Every neighbor<span className="text-leaf"> deserves a voice.</span>
