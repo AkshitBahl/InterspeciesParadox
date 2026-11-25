@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { KeyRound, LogIn, Server } from "lucide-react";
 
@@ -8,6 +8,9 @@ import LeafSpinner from "../../components/ui/LeafSpinner";
 import { API_BASE_URL } from "../../services/apiClient";
 import { errorMessage, login } from "../../services/live/client";
 import { DEMO_PASSWORD, demoAccounts } from "./session";
+
+// A backend on this computer gets the "how to start it" hint; the hosted one does not.
+const LOCAL_BACKEND = /^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(API_BASE_URL);
 
 const inputStyle =
   "w-full rounded-xl border border-forest/15 bg-cream px-4 py-3 text-sm text-ink outline-none focus:border-leaf focus:ring-2 focus:ring-leaf/10";
@@ -20,6 +23,17 @@ export default function LoginPage() {
   const [password, setPassword] = useState(DEMO_PASSWORD);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  // The free hosted server sleeps when nobody uses it, so the first login can take a minute.
+  const [slow, setSlow] = useState(false);
+
+  useEffect(() => {
+    if (!busy) return;
+    const timer = window.setTimeout(() => setSlow(true), 4000);
+    return () => {
+      window.clearTimeout(timer);
+      setSlow(false);
+    };
+  }, [busy]);
 
   async function submit(event?: FormEvent) {
     event?.preventDefault();
@@ -63,10 +77,20 @@ export default function LoginPage() {
           <Button type="submit" disabled={busy} className="w-full">
             {busy ? <LeafSpinner size={17} /> : <LogIn size={17} />} {busy ? "Logging in…" : "Log in"}
           </Button>
+          {slow && (
+            <p role="status" className="text-xs leading-relaxed text-ink/60">
+              Waking up the neighborhood server. The first login after a quiet spell can take up to a minute.
+            </p>
+          )}
         </form>
 
         <p className="flex items-start gap-2 text-xs leading-relaxed text-ink/50">
-          <Server size={14} className="mt-0.5 shrink-0" /> Backend: {API_BASE_URL}. Start it with <code>uvicorn app.main:app</code> in the backend folder.
+          <Server size={14} className="mt-0.5 shrink-0" /> Backend: {API_BASE_URL}.
+          {LOCAL_BACKEND && (
+            <>
+              {" "}Start it with <code>uvicorn app.main:app</code> in the backend folder.
+            </>
+          )}
         </p>
       </Card>
 

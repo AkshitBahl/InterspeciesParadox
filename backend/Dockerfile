@@ -12,4 +12,5 @@ COPY . .
 
 EXPOSE 8000
 # 1) create/upgrade the tables, 2) load the demo data (safe to repeat: existing rows are kept), 3) start the API
-CMD ["sh", "-c", "alembic upgrade head && python -m app.seed && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+# Hosts like Railway set $PORT; locally it stays 8000.
+CMD ["sh", "-c", "alembic upgrade head && python -m app.seed && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
