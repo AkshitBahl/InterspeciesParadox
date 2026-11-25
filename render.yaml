@@ -1,0 +1,42 @@
+# Render Blueprint for the backend: the FastAPI API and its PostgreSQL database.
+# Render reads this file when you click New > Blueprint and pick this repository.
+# The frontend is deployed separately on Vercel. Step by step guide: DEPLOY.md
+services:
+  - type: web
+    name: interspecies-paradox-api   # becomes https://interspecies-paradox-api.onrender.com
+    runtime: python
+    plan: free
+    region: frankfurt                # closest Render region to Brussels
+    rootDir: backend
+    branch: main
+    autoDeployTrigger: commit        # every push to main redeploys the API
+    buildCommand: pip install -r requirements.txt
+    # 1) create or upgrade the tables  2) load the demo data (only the first time, it keeps
+    # existing rows)  3) start the API on the port Render gives us
+    startCommand: alembic upgrade head && python -m app.seed && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.12
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: interspecies-paradox-db
+          property: connectionString
+      - key: JWT_SECRET_KEY
+        generateValue: true          # Render makes a long random secret for us
+      # Lets the Vercel site (and its preview links) call the API from the browser.
+      - key: CORS_ORIGIN_REGEX
+        value: 'https://interspecies-paradox(-[a-z0-9-]+)?\.vercel\.app'
+      # Render's proxy speaks HTTPS to the browser; trust its X-Forwarded-Proto header
+      # so redirects stay on https.
+      - key: FORWARDED_ALLOW_IPS
+        value: "*"
+
+databases:
+  - name: interspecies-paradox-db
+    plan: free                       # free for 30 days, then it must be upgraded or recreated
+    region: frankfurt
+    databaseName: interspecies
+    user: paradox

@@ -79,6 +79,11 @@ uvicorn app.main:app --reload        # http://localhost:8000/docs
 
 `python -m app.seed --reset` wipes everything and starts the demo again.
 
+### Option C: online (Render)
+
+`render.yaml` at the repository root deploys this API and a PostgreSQL database on Render,
+and the frontend goes on Vercel. Step by step: [`DEPLOY.md`](../DEPLOY.md).
+
 ### Run the tests
 
 ```bash

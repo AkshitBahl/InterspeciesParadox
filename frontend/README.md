@@ -26,6 +26,11 @@ React 19 + Vite + Tailwind, with MapLibre GL for the neighborhood map (Leaflet i
    http://localhost:5173/dashboard), then click **Log in** and pick a demo resident (password `coexist2126`).
    Noor has a fresh fox case to take through every step; Lina's house martin case already has an active agreement.
 
+## Put it online
+
+The site deploys on Vercel (`vercel.json`, Root Directory `frontend`) and talks to the backend on Render.
+`npm run build` uses `.env.production` (live mode + the Render API address). See [`DEPLOY.md`](../DEPLOY.md).
+
 ## The neighborhood map (`/map`)
 
 The map is the main feature, so it has its own full-screen page at http://localhost:5173/map
